@@ -1,0 +1,150 @@
+% LTeX: language=en-US
+
+\begin{frame}{A basic New Keynesian model}
+	\begin{wideitemize}
+	    \item Consider a three equation \hi{linearized New-Keynesian} textbook model \parencite[e.g.][]{Gali2015book,Walsh2010}
+%	    \item This model is \hi{extremely stylised}.
+%	    \begin{itemize}
+%	        \item It is useful to build intuition.
+%	        \item But too simple for many policy applications.
+%	        \item We use it as a testbed for methods.
+%	    \end{itemize}
+%	    \item Nonetheless, we will take it seriously and perform quantitative work with this model.
+%	    \item All of todays' techniques easily \hi{extend to larger models.}
+%	\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}{A basic New Keynesian model: Background}
+%	\begin{wideitemize}
+%	    \item Key element: \hi{Nominal frictions} such as price and wage rigidity.
+%	    \item \hi{Aggregate demand} plays a central role for short-run output fluctuations.
+%	    \item Monetary policy is represented by a rule for setting the short-term nominal interest rate.
+%	    \item Monetary policy can affect real output.\footcite{CEE05}
+%	    \item Despite its simplicity, the framework is consistent with
+%        \hi{optimising behaviour} by private agents (and not ``starting from curves'').
+%	\end{wideitemize}
+%\end{frame}
+%
+%
+%\begin{frame}{Three equations}
+%The canonical (linearised) New Keynesian Model features three equations (in deviation from the steady state):
+	\begin{wideenumerate}
+	    \item \hi{New Keynesian Phillips curve}
+    	    \begin{equation}
+    	        \pi_t = \beta E_t\left[\pi_{t+1}\right]+\kappa y_t +\varepsilon_t^a
+	        \end{equation}
+	    \item \hi{New Keynesian IS curve}
+	     \begin{equation}
+    	        y_t = E_t \left[y_{t+1} \right]
+    	        - \frac{1}{\sigma}\left(i_t-E_t\left[\pi_{t+1}\right]\right)+\varepsilon_t^c
+	        \end{equation}
+	         \item \hi{An interest-rate rule}
+	        \begin{equation}
+    	        i_t = \rho_ii_{t-1}+ (1-\rho_i)(\phi_\pi \pi_t + \phi_y y_t) + \varepsilon_t^i
+            \end{equation}
+	\end{wideenumerate}
+\item The shock processes are AR(1):
+\begin{equation}
+\varepsilon_t^j = \rho^j\varepsilon_{t-1}^j +u_t^j, \quad u_t^j\overset{iid}{\sim}\mathcal{N}(0,\sigma_j^2) \quad  \forall \:  j \: \in \{a,c,i\}
+\end{equation}
+\end{wideitemize}
+\end{frame}
+
+%\begin{frame}{Some economics: 1. The NK Phillips curve}
+%	\begin{wideitemize}
+%	    \item New Keynesian Phillips curve derives from optimal pricing decisions of firms:
+%    	
+%	        \begin{equation*}
+%    	        \pi_t = \beta E_t\left[\pi_{t+1}\right]+\kappa y_t +\varepsilon_t^a
+%	        \end{equation*}
+%	    \item Inflation $\pi_t$ is forward looking: $\pi_t = \kappa \sum_i^{\infty}\beta^{i}E_t y_{t+i}$
+%	    \begin{itemize}
+%	        \item Sticky prices imply that firms are concerned with inflation because they may be unable to adjust their prices for some periods (randomly arriving opportunities to adjust prices.\footcite{calvo1983staggered})
+%	    \end{itemize}
+%	    \item Inflation depends on current marginal costs (which have linked directly to the output gap here) governed by parameter $\kappa$ and a cost-push shock $\varepsilon_t^a$.
+%	\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}{Some economics: 2. The IS curve}
+%	\begin{wideitemize}
+%	    \item The IS curve derives from optimal intertemporal household decisions
+%    	    \begin{equation*}
+%    	        y_t = E_t \left[y_{t+1} \right]
+%    	        - \frac{1}{\sigma}\left(i_t-E\left[\pi_{t+1}\right]\right)+\varepsilon_t^c
+%	        \end{equation*}
+%	    \item It's a linearised version of the consumption Euler equation (intertemporal consumption optimality) subject to a demand shock $\varepsilon_t^c$.
+%	    \item  It's forward looking: output (or consumption) today is driven by expectations of future output (consumption) and it depends negatively on the ex ante real interest rate $\left(i_t-E_t\left[\pi_{t+1}\right]\right)$.
+%	\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}{Some economics: 3. Interest-rate rules}
+%	\begin{wideitemize}
+%	    \item We will consider a Taylor-rule responding to inflation and the output gap\footcite{Tay93}:  \begin{equation*}
+%    	        i_t = \phi_\pi \pi_t + \phi_y y_t + \varepsilon_t^i
+%            \end{equation*}
+%            \item Interest rates ``lean against'' inflation and output gaps. \textit{Taylor principle}: $\phi_\pi > 1$.
+%	    \item This specification is a simple but reasonable empirical description of central bank policy.\footcite{clarida1999science}
+%	\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}{Shocks}
+%	\begin{wideitemize}
+%	    \item For latter simulations, we assume that shocks follow stochastic processes (autoregressive of order 1):
+%	    \begin{align*}
+%        \text{Cost-push:} \qquad &\varepsilon_t^a = \rho^a\varepsilon_{t-1}^a +u_t^a \\
+%        \text{Demand:} \qquad &\varepsilon_t^c =\rho^c\varepsilon_{t-1}^c +u_t^c \\
+%        \text{Monetary policy:} \qquad &\varepsilon_t^i = \rho^i\varepsilon_{t-1}^i +u_t^i
+%    \end{align*}
+%    \item The $\rho$'s govern the persistence.
+%    \item The $u$'s are iid normal innovations.
+%	\end{wideitemize}
+%\end{frame}
+
+%\begin{frame}{Recap: Where do the equations come from?}
+%	\begin{wideitemize}
+%	    \item Walsh (2017)\footcite{walsh2017monetary} Chapter 8 derives the model from first principles, i.e. utility and profit maximisation.
+%	    \item Households maximise utility. They have access to short-term bonds, provide labour and consume the single good.
+%	    \item Firms maximise profits subject to pricing frictions.
+%	    \begin{itemize}
+%	        \item When prices cannot adjust immediately to changes in economic conditions, there is an inefficiency: Scope for monetary policy.
+%	    \end{itemize}
+%	    \item We use the resulting \hi{linearised model} in it's textbook form.
+%	\end{wideitemize}
+%\end{frame}
+
+\begin{frame}{Our OBC: the Effective Lower Bound}
+	\begin{wideitemize}
+	    \item An \hi{effective lower bound} (ELB) on nominal interest rates constrains central banks from actually lowering interest rates below $i^{lb}$
+%	            \item The ECB and the Fed (and many other) have been constrained (for some time) following the Great Recession
+%	    \item Walsh (2017, p.511): ``Negative rates mean one is paid to hold money. Nothing in standard
+%models would limit the demand for money.''
+         \item Modify our equation to account for the nonlinearity:
+        \begin{equation}
+	        i_t = \max\{i_t^{not},i^{lb}\} \: ,
+        \end{equation}
+        where the notional interest rate $i_t^{not}$ in the absence of the ZLB is given by
+        \begin{equation}	
+        i_t^{not}=\rho_i i_{t-1}^{not}+ (1-\rho_i)(\phi_\pi \pi_t + \phi_y y_t) + \varepsilon_t^i
+        \end{equation}
+        \item We will use demand shock $u_t^c$ to induce ELB to bind
+%        \item Many interesting issues arise here (e.g. multiple equilibria). We will only briefly touch upon this important point
+	\end{wideitemize}
+\end{frame}
+
+%\begin{frame}{Important limitations}
+%	\begin{wideitemize}
+%	    \item The model is extremely stylised.
+%	    \item Inflation is purely forward-looking.
+%	    \item No consideration
+%	       \begin{itemize}
+%	           \item Fiscal policy
+%	           \item Open economy dimension
+%	           \item Empirical model specifications with rigidities\footcite{SmWo2007}
+%	           \item Other nonlinearities
+%	       \end{itemize}
+%	    \item However, this is a \hi{course on tools}: Let's use this simple model as a showcase and bring it into a computer.
+%	\end{wideitemize}
+%\end{frame}
+
+
+

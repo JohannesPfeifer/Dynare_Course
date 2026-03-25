@@ -1,0 +1,66 @@
+\begin{frame}{Deterministic and stochastic simulations}
+	\begin{itemize}
+%	    \item In general, we are interested in using our model for policy experiments and other simulations.
+%	    \begin{itemize}
+%	        \item How do agents react to temporary or permanent shocks?
+%	    \end{itemize}
+	    \item Dynare offers \hi{two ways} to solve and simulate the model:
+	    \begin{enumerate}
+            \item \hi{Deterministic} simulations (perfect foresight):  all future shocks are known exactly.
+	       \item \hi{Stochastic} simulations (perturbation):  only the shock distributions are known.
+        \end{enumerate}
+%	   \item We will build some intuition on how Dynare performs these simulations.
+%         \begin{itemize}
+%	        \item We also consider OccBin - a toolkit to simulate models with OBCs
+%	    \end{itemize}
+%	    %\item There are other methods, such as projection methods, which I will not discuss.
+%	\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}{Deterministic and stochastic simulations (cont'd)}
+%	\begin{wideitemize}
+%	    \item Dynare translates your model into a general form.\footnote{A great intro by Willi Mutschler: \url{https://www.youtube.com/watch?v=KHTEZiw9ukU}}
+%	    \item Let $x_t$ denote the vector of endogenous variables at time $t$, $u_t$ the shocks (at the beginning of the period) and $\theta$ the parameters.
+%	    \item Deterministic (no uncertainty) $f\left(x_{t-1},x_t,x_{t+1},u_t | \theta \right)$
+%          \item Stochastic (with shocks) $Ef\left(x_{t-1},x_t,x_{t+1},u_t | \theta \right) =0,$ with decision rules $x_t = g(x_{t-1},u_t|\theta)$ and assumptions about shock distributions.
+%	\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}{Deterministic and stochastic simulations (cont'd)}
+\item Both employ different techniques and have different advantages and limitations.
+\begin{columns}[T]
+\column{0.5\linewidth}
+\begin{wideitemize}
+    \item \hi{Deterministic:}
+     \begin{itemize}
+	        \item[+] Arbitrary precision
+	        \item[+] Easily captures nonlinearities (such as OBCs)
+	        \item[-] Assumptions of perfect foresight
+	        \item[-] How to simulate time series?
+	    \end{itemize}
+\end{wideitemize}
+\column{0.5\linewidth}
+\begin{wideitemize}
+    \item \hi{Stochastic:}
+	      \begin{itemize}
+	        \item[+] Captures uncertainty
+	        \item[+] Needed for estimation with state space form
+	        \item[-] Often uses 1st order approximations: Certainty equivalence
+	        \item[-] High-order approximations are possible but can be challenging to use for OBCs
+	        \item[+] Perturbation methods can capture OBCs with additional tools (OccBin)
+	    \end{itemize}
+\end{wideitemize}
+\end{columns}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Our plan on simulations}
+\begin{wideenumerate}
+    \item Deterministic simulations: Method and example with OBCs
+    \item Stochastic simulations: Method and example
+    \item Occbin simulations: Method and example with OBCs
+\end{wideenumerate}
+\end{frame}
+
+

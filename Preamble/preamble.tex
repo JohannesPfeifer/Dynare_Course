@@ -1,0 +1,209 @@
+
+\usepackage[english]{babel}
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\else
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\usepackage{newunicodechar}
+\newfontfamily\unicodeSymbolFont{Segoe UI Symbol}[
+  BoldFont=Segoe UI Symbol,
+  ItalicFont=Segoe UI Symbol,
+  BoldItalicFont=Segoe UI Symbol
+]
+\newunicodechar{⟂}{{\unicodeSymbolFont ⟂}}
+\fi
+\usepackage{amsmath,amsfonts}
+\usepackage{booktabs,multirow,xcolor,colortbl}
+\usepackage{bm}%to use a more powerful version of \boldsymbol
+\usepackage{fvextra}
+\usepackage{csquotes}
+\usepackage{textcomp}
+\ifPDFTeX
+\DeclareUnicodeCharacter{27C2}{\ensuremath{\perp}}
+\fi
+
+\newcommand{\AllSample}{ \mathcal Y^T }
+
+\usepackage[citestyle=authoryear-comp,bibstyle=../Preamble/mystyle_lowercase,maxbibnames=5,minbibnames=1,maxnames=2, minnames=1,datezeros=false,date=long,isbn=false,url=false,backend=biber,useprefix=true]{biblatex}
+\addglobalbib{../Preamble/Macro_database_biblatex.bib}	
+
+\usepackage{upquote}
+\usepackage{ragged2e}
+\usepackage{microtype}
+
+\usepackage{multimedia}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{epstopdf}
+\usepackage[labelfont=bf,format=hang, figurename=Fig.]{caption}
+\usepackage[subrefformat=parens,labelformat=empty]{subcaption}
+\usepackage{pgfpages} % for multiple-screen presentations
+
+\usepackage{array}
+
+\newcolumntype{L}[1]{>{\RaggedRight\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
+
+
+%%% use serif font for math
+\usefonttheme[onlymath]{serif}
+
+%%% define blue highlighting
+\newcommand{\highlight}[1]{{\color{blue}{#1}}}
+
+%%%% define command for setting sources
+
+\newcommand{\Source}{}
+
+%%%
+\beamertemplatenavigationsymbolsempty
+
+
+%%% define themes
+\usetheme{Boadilla}
+\usecolortheme{rose}
+\usecolortheme[named=blue]{structure}
+
+\newcommand\textbox[1]{%
+  \parbox{.333\textwidth}{#1}%
+}
+
+\setbeamertemplate{sections/subsections in toc}[sections numbered]
+
+
+%%%% set coloring in  foot and head
+\setbeamercolor{alerted text}{fg=red!80!black}
+\setbeamertemplate{enumerate items}[default] % numbers enumerate items without encircling them
+\setbeamertemplate{itemize items}[ball] % numbers enumerate items without encircling them
+\setbeamercolor{section in head/foot}{fg=black, bg=white}
+\setbeamercolor{subsection in head/foot}{fg=black, bg=white}
+\setbeamercolor{title}{fg=black}
+\setbeamercolor{subtitle}{fg=blue}
+
+\setbeamertemplate{caption}[numbered]
+
+%%% set overlays as default
+\beamerdefaultoverlayspecification{<+->}
+
+%%%% settings for output mode
+
+\mode<beamer>
+{
+%\setbeameroption{show notes on second screen=right}
+}
+
+\mode<trans>
+{\renewcommand{\highlight}[1]{{\textbf{#1}}}}
+
+
+\mode<handout>
+{
+\renewcommand{\highlight}[1]{{\textbf{#1}}}
+%\pgfpagesuselayout{4 on 1}[a4paper,border shrink = 5mm,landscape]
+%\setbeamercolor{background canvas}{bg=black!5}
+}
+
+
+%%% define Exercise counter
+\newcounter{Exercise}
+\resetcounteronoverlays{Exercise}
+\setcounter{Exercise}{0}
+\newcommand{\Exercise}{\refstepcounter{Exercise}\emph{\structure{Übung \theExercise}: }}
+
+%%%% define environments for theorems etc and make them numbered
+\setbeamertemplate{theorems}[numbered]
+
+\newtheorem{assum}{Assumption}
+\setbeamertemplate{assum}[numbered]
+
+\newtheorem{defin}{Definition}
+\setbeamertemplate{defin}[numbered]
+
+\newtheorem{propos}{Proposition}
+\setbeamertemplate{propos}[numbered]
+
+
+%%%% Make Parts show up in TOC
+\makeatletter
+\AtBeginPart{%
+  \addtocontents{toc}{\protect\beamer@partintoc{\the\c@part}{\beamer@partnameshort}{\the\c@page}}%
+}
+%% number, shortname, page.
+\providecommand\beamer@partintoc[3]{%
+  \ifnum\c@tocdepth=-1\relax
+    % requesting onlyparts.
+    \makebox[6em]{#1.} #2
+    \par
+  \fi
+}
+\define@key{beamertoc}{onlyparts}[]{%
+  \c@tocdepth=-1\relax
+}
+\makeatother%
+
+%%%% fix bug in beamer package with note itemize
+%%% http://tex.stackexchange.com/questions/1480/changing-the-textwidth-of-the-notes-in-beamer-repost-from-so
+\makeatletter
+\defbeamertemplate{note page}{infolines}
+{%
+  \vskip.75em
+  \nointerlineskip
+  \begin{minipage}{\textwidth} % this is an addition
+  \footnotesize \insertnote
+  \end{minipage}               % this is an addition
+}
+\makeatother
+
+\setbeamertemplate{note page}[infolines]
+
+
+\newcommand{\backupbegin}{
+   \newcounter{framenumberappendix}
+   \setcounter{framenumberappendix}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \addtocounter{framenumberappendix}{-\value{framenumber}}
+   \addtocounter{framenumber}{\value{framenumberappendix}}
+}
+
+\hypersetup{bookmarksnumbered=true,naturalnames=true,pdfhighlight=/N,citebordercolor={1 1
+1},linkbordercolor={1 1 1},colorlinks=true,anchorcolor=black,linkcolor=blue,citecolor=green,urlcolor=green,
+pdfpagemode=UseOutlines,breaklinks=true,
+pdfkeywords=Dynare, pdfsubject=Dynare,pdfstartpage=1} %pdfpagemode=fullpage
+
+\usepackage[copyright]{ccicons}
+
+\usepackage{tikz,pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows,calc,decorations.pathreplacing,decorations.shapes}
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+\usepackage{relsize}
+\newcommand\LM{\ensuremath{\mathit{LM}}}
+\newcommand\IS{\ensuremath{\mathit{IS}}}
+\DeclareMathOperator{\std}{std}
+
+
+\setbeamertemplate{footline}{
+\begin{beamercolorbox}{subsection in head/foot}
+\insertsectionnavigationhorizontal{.95\textwidth}{\hskip0pt
+\hfill}{\hfill \insertframenumber /\inserttotalframenumber}
+\end{beamercolorbox}
+}
+
+\newenvironment{witemize}{\itemize\addtolength{\itemsep}{8pt}}{\enditemize}
+\newenvironment{wenumerate}{\enumerate\addtolength{\itemsep}{8pt}}{\endenumerate}
+
+\usepackage[]{minted}
+\input{../Preamble/minted_settings} 

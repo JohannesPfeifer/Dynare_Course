@@ -1,0 +1,212 @@
+
+
+\begin{frame}{Class of models: OBCs}
+\begin{wideitemize}
+\item Consider the general state-space representation for a large class of dynamic models 
+\begin{align*}
+X_t &= \psi\left(X_{t-1},u_t;\theta\right)\\
+Y_t &= g\left(X_t,\xi_t;\theta\right),
+\end{align*}
+with states $X_t$, innovations $u_t$, and deep parameters $\theta$.
+\item Our focus: Guerrieri and Iacoviello's (2015, JME) OccBin toolkit casts the piecewise linear solution into:
+\begin{align*}
+X_t &= \psi^{OccBin}\left(X_{t-1},u_t;\theta\right)\\
+&= \mathbf{T}(X_{t-1},u_t;\theta)X_{t-1}+\mathbf{C}(X_{t-1},u_t;\theta)+\mathbf{R}(X_{t-1},u_t;\theta)u_t,
+\end{align*}
+where $u_t \sim \mathcal{N}(\mathbf{0},\mathbf{Q})$.
+\item Observation equation: $Y_t=\mathbf{H} X_t$
+\item We want to estimate this model. 
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Estimation with OBCs: Perturbation}
+\begin{wideitemize}
+\item It is possible to integrate OccBin into a basic and fast filter.
+\item We want to estimate the deep parameters of the model $\theta$, given a set of observables $Y_t$
+\begin{align*}
+    X_t &= \mathbf{T}(X_{t-1},u_t;\theta)X_{t-1}+\mathbf{C}(X_{t-1},u_t;\theta)+\mathbf{R}(X_{t-1},u_t;\theta)u_t,\\
+    Y_t&=\mathbf{H} X_t. 
+\end{align*}
+\item In models with OBCs $X_t$ and $u_t$ change the transition matrices. 
+\item  We add additional steps to the standard Kalman filter to also estimate the OBC’s timing and duration.
+\item This approach embeds the Kalman recursion into an iterative ``guess and verify''-procedure.
+\end{wideitemize}
+\end{frame}
+
+ 
+\begin{frame}{Alternatives for model estimation with OBCs}
+\label{lit}
+	\begin{wideitemize}
+	\item Current available estimation methods have limitations: 
+	\begin{itemize}
+		\item Inversion filter (e.g. Guerrieri and Iacoviello, 2017, JME): Applies a piecewise-linear approximation
+		 \begin{itemize}
+		\item Backing out shocks from observed time series by ``inversion'' implies \# shocks must equal \# observables, ruling out some interesting applications
+\end{itemize}
+	\item Particle filter (e.g. Cuba-Borda et al.,2019, JAE; Atkinson et al., 2019, JME)
+    \begin{itemize}
+    \item Computational costs for empirically driven applications with many state variables 
+    \item Sensitive choice of measurement errors
+    \end{itemize}
+	\end{itemize}
+\item PKF also handles missing data and non-stationarity in the same way as standard diffuse Kalman filters.
+\end{wideitemize}
+\hyperlink{details_lit}{\beamerbutton{Other approaches}}
+\end{frame}
+
+
+
+\begin{frame}{OccBin Algorithm}
+\begin{wideitemize}
+\item Our state-space form changes:
+\item We obtain the transition matrices $\mathbf{T}(X_{t-1},u_t;\theta), \mathbf{C}(X_{t-1},u_t;\theta)$ and $\mathbf{R}(X_{t-1},u_t;\theta)$ via simulations.
+\item For this, we apply the OccBin toolkit to \hi{adapt the Kalman filter}.
+\item Once we can evaluate the likelihood, the rest of the estimation routines remain as before.
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Standard KF: Initialization}
+\label{pkf_init}
+\begin{wideitemize}
+    \item Given the initial state mean and variance $X_0$ and $\mathbf{P}_0$, we denote their `best' estimate at any time $t-1$ $X_{t-1|t-1}, \mathbf{P}_{t-1|t-1}.$	
+    \item Notation for state-dependent matrices: 
+    \begin{eqnarray*}
+    \mathbf{T}_{t|t}&=& \mathbf{T}(X_{t-1},u_{t}) \\
+    \mathbf{C}_{t|t}&=& \mathbf{C}(X_{t-1},u_{t}) \\
+    \mathbf{R}_{t|t} &=& \mathbf{R}(X_{t-1},u_{t}),
+    \end{eqnarray*}
+\item Initialize the guess of the updated state matrices for iteration $j=0$
+\hyperlink{details_pkf_init}{\beamerbutton{Initialization}}
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Standard KF: Prediction}
+\label{details_pred_upd}
+\begin{itemize}
+\item Given the guessed matrices, perform a prediction step
+\begin{align*}
+X^{(j)}_{t|t-1}&=\mathbf{T}^{(j-1)}_{t|t}\cdot X_{t-1|t-1}+\mathbf{C}^{(j-1)}_{t|t} \\
+\mathbf{P}^{(j)}_{t|t-1}&=\mathbf{T}^{(j-1)}_{t|t}\cdot \mathbf{P}_{t-1|t-1}^{(j-1)}\cdot\mathbf{T'}^{(j-1)}_{t|t} +\mathbf{R}^{(j-1)}_{t|t}\cdot \mathbf{Q}\cdot
+\mathbf{R'}^{(j-1)}_{t|t}
+\end{align*}
+the latter denotes $\mathbf{P}_{t|t-1} = E\left[\left(X_t-X_{t|t-1}\right)\left(X_t-X_{t|t-1}\right)'\right]$.
+\item We can now compute the associated value for the observed data and the innovation covariance:
+\begin{align*}
+Y^{(j)}_{t|t-1}&=\mathbf{H} X^{(j)}_{t|t-1}\\
+\mathbf{F}^{(j)}_{t}&=\mathbf{H}\cdot \mathbf{P}^{(j)}_{t|t-1}\cdot \mathbf{H}'
+%\\v^{(j)}{t}&= z_t-Y^{(j)}_{t|t-1} 
+\end{align*}
+with the prediction error $v^{(j)}_{t}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Standard KF: Update}
+\label{details_pred_upd}
+\begin{itemize}
+\item Next we can use the values for $X^{(j)}_{t|t-1}$ and $\mathbf{P}^{(j)}_{t|t-1}$
+to update the state estimate
+\begin{eqnarray*}\label{eq:update1}
+\mathbf{K}^{(j)}_t  &=&  \mathbf{P}^{(j)}_{t|t-1}\cdot\mathbf{H}'\\
+X^{(j)}_{t|t} &=& X^{(j)}_{t|t-1}+\mathbf{K}^{(j)}_t \left(\mathbf{F}^{(j)}_{t}\right)^{-1}v^{(j)}_t  \nonumber
+\end{eqnarray*}
+and the covariance estimate:
+\begin{eqnarray*}\label{eq:update1n}
+\mathbf{P}^{(j)}_{t|t} &=& \mathbf{P}^{(j)}_{t|t-1}-\mathbf{K}^{(j)}_t\left(\mathbf{F}^{(j)}_{t}\right)^{-1}\\
+\end{eqnarray*}
+\item $\mathbf{K}^{(j)}_t$ is the estimator that offers the best prediction of $X_t$ given $X_{t|t-1},Y_{t}$ and $Y_{t|t-1}$
+\item Here, each iteration $j$ follows the standard Kalman recursion.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{PKF (new part): Update the matrices $\mathbf{T}$, $\mathbf{C}$, and $\mathbf{R}$}
+\begin{wideitemize}
+\item The time-varying matrices are functions of $X^{(j)}_{t-1|t}$ and shock $u^{(j)}_{t|t}$: Requires additional steps.
+\item First, the shock estimate in $t$ (and note the invertibility requirement).
+\begin{equation*}
+u^{(j)}_{t|t} =  \mathbf{Q}\cdot \mathbf{R}'^{(j-1)}\cdot \mathbf{H}' \left(\mathbf{F}^{(j)}_{t}\right)^{-1} v^{(j)}_{t},
+\end{equation*}
+\item Second, iterate one step backward (smoother step) to update the state in $t-1$ given $t$,  i.e. for $s=t,t-1$ (and $r_{t+1}=0.)$
+\begin{eqnarray*}
+\mathbf{L}_s &=& \mathbf{I} - \mathbf{K}^{(j)}_s \left(\mathbf{F}^{(j)}_{s}\right)^{-1} \mathbf{H}\\
+r^{(j)}_{s} &=& \mathbf{H}' \left(\mathbf{F}^{(j)}_{s}\right)^{-1} v^{(j)}_{s}+\mathbf{L}'_s\mathbf{T}'^{(j-1)}_{s|s}r^{(j)}_{s+1} \nonumber\\ 
+X^{(j)}_{s|t} &=& X^{(j)}_{s|s-1}+\mathbf{P}^{(j)}_{s|s-1}\cdot r^{(j)}_{s}.
+\end{eqnarray*}
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{PKF (new part): Simulation step and convergence}
+\begin{wideitemize}
+\item With $X^{(j)}_{t-1|t}$ and shock $u^{(j)}_{t|t}$ as the initial condition, simulate the piecewise-linear model for $s\in (t, \infty)$
+    \item New expected duration of OBCs allows updating the matrices% $\mathbf{T}^{(j)}_{t|t}$, $\mathbf{R}^{(j)}_{t|t}$,  $\mathbf{C}^{(j)}_{t|t}$.
+\item If the update differs from the guess, set the guess to $\mathbf{T}^{(j)}_{t|t}$,$\mathbf{R}^{(j)}_{t|t}$, $\mathbf{C}^{(j)}_{t|t}$ and restart from Step 1 with $j+1$.
+\item Otherwise, proceed to $t+1$ and until $T$, by setting the updated state matrices
+	\begin{eqnarray*}
+		\mathbf{T}_{t|t}&=&\mathbf{T}^{(j)}_{t|t} =\mathbf{T}^{(j-1)}_{t|t} \\
+		\mathbf{R}_{t|t}&=&\mathbf{R}^{(j)}_{t|t}=\mathbf{R}^{(j-1)}_{t|t} \\
+		\mathbf{C}_{t|t}&=&\mathbf{C}^{(j)}_{t|t}=\mathbf{C}^{(j-1)}_{t|t}  ,
+	\end{eqnarray*}
+and states ($X_{t|t}=X^{(j)}_{t|t}$) and covariance $\mathbf{P}_{t|t}=\mathbf{P}^{(j)}_{t|t}$.
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{PKF: Likelihood}
+\begin{wideitemize}
+\item Given the prediction error 
+\begin{equation*}\label{eq:errorPKF}
+v_{t}^{(j)}= z_t-Y^{(j)}_{t|t-1}
+\end{equation*}
+\item ... we can compute the log-likelihood density of the data at time $t$:
+\begin{equation*}\label{eq:likt}
+\mathcal{L}_t(\theta)=-\tfrac{1}{2} n_t \log\left(2\pi\right) -\tfrac{1}{2}\log\left(\det(\mathbf{F}^{(j)}_{t}(\theta))\right) -\tfrac{1}{2} \left(v^{(j)}_t\right)'\cdot \left(\mathbf{F}^{(j)}_{t}(\theta)\right)^{-1} \cdot v^{(j)}_t,
+ \end{equation*}
+\item and the sample likelihood:
+\begin{equation*}\label{eq:likt}
+\mathcal{L}(\theta) = \sum_{t = 1}^{T} \mathcal{L}_t(\theta).
+\end{equation*}
+\end{wideitemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code for estimation}
+Suffices to add the \href{https://www.dynare.org/manual/the-model-file.html?highlight=occbin_setup#occbin_setup}{\texttt{occbin\_setup;}} keyword (as usual many options available)
+\begin{minted}{c++}
+occbin_setup;
+\end{minted}
+before the \hi{standard} estimation command:
+\begin{minted}{c++}
+estimation(
+//mh_replic=0, // Draws from the chain
+presample = 20,
+use_univariate_filters_if_singularity_is_detected=0,
+datafile=dataobsnkm,
+nodisplay, 
+first_obs=2,
+graph_format=(eps,fig), 
+smoother);
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Some hints}
+\begin{wideitemize}
+\item Implementation in the univariate filter is still buggy
+\begin{minted}{c++}
+use_univariate_filters_if_singularity_is_detected=0,
+\end{minted}
+\item Allow for multiple solutions in the estimation:
+\begin{minted}{matlab}
+options_.occbin.likelihood.periodic_solution=true;
+\end{minted}
+\item Standard convergence criteria and prior-posterior checks can be applied to the estimation with OBCs as well.
+\end{wideitemize}
+\end{frame}
+
+
+
+
+
+\begin{frame}{Hands-on}
+\begin{wideitemize}
+\item Let's look at the \hi{code for estimation with the PKF} in practice.
+\item More details this Friday at 10:30: Seminar ``Efficient and robust inference of models with occasionally binding constraints'' 
+\end{wideitemize}
+\end{frame}

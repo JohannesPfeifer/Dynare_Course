@@ -1,0 +1,66 @@
+\begin{frame}
+\textbf{Annex}
+\end{frame}
+
+\begin{frame}{Other nonlinear filtering methods in macroeconomics}
+\label{details_lit}
+\begin{wideitemize}
+\item Boehl (2021) proposes a promising and very fast piecewise-linear solution algorithm.
+\item Farmer (2021) provides a fast nonlinear approximation of the likelihood in non-Gaussian state space
+models. 
+\item Aruoba et al. (2020) exploit the piecewise-linear nature of OBCs for high-order solution
+and particle filtering. 
+\item These methods are particularly suitable for low-dimensional state-spaces but are
+difficult to scale to models with more state variables.
+\item For Markov-switching models, Maih (2015) provides efficient perturbation methods.
+\end{wideitemize}
+\hyperlink{lit}{\beamerbutton{Back}}
+\end{frame}
+
+
+\begin{frame}{PKF: Initialization}
+\label{details_pkf_init}
+\begin{wideitemize}
+    \item Given the initial state mean and variance $x_0$ and $\mathbf{P}_0$, we denote their `best' estimate at any time $t-1$ $x_{t-1|t-1}, \mathbf{P}_{t-1|t-1}.$	
+    \item Notation for state-dependent matrices: 
+    \begin{eqnarray*}
+    \mathbf{T}_{t|t}&=& \mathbf{T}(x_{t-1},\varepsilon_{t}) \\
+    \mathbf{C}_{t|t}&=& \mathbf{C}(x_{t-1},\varepsilon_{t}) \\
+    \mathbf{R}_{t|t} &=& \mathbf{R}(x_{t-1},\varepsilon_{t}),
+    \end{eqnarray*}
+\item Initialize the guess of the updated state matrices for iteration $j=0$
+\begin{eqnarray*}
+\mathbf{T}^{j}_{t|t}&=&\mathbf{T}_{t|t-1} \\
+\mathbf{R}^{j}_{t|t}&=&\mathbf{R}_{t|t-1} \\
+\mathbf{C}^{j}_{t|t}&=&\mathbf{C}_{t|t-1}. 
+\end{eqnarray*}
+\item Superscript $j$ denotes the iteration to find the state matrices.
+\end{wideitemize}
+\hyperlink{pkf_init}{\beamerbutton{Back}}
+\end{frame}
+
+\begin{frame}{PKF: Standard prediction and update step}
+	\label{details_pred_upd}
+\begin{itemize}
+\item Given the guessed matrices, perform a prediction step
+\begin{align*}
+x^{(j)}_{t|t-1}&=\mathbf{T}^{(j-1)}_{t|t}\cdot x_{t-1|t-1}+\mathbf{C}^{(j-1)}_{t|t} \\
+\mathbf{P}^{(j)}_{t|t-1}&=\mathbf{T}^{(j-1)}_{t|t}\cdot \mathbf{P}_{t-1|t-1}\cdot \mathbf{T'}^{(j-1)}_{t|t} +\mathbf{R}^{(j-1)}_{t|t}\cdot \mathbf{Q}\cdot \mathbf{R'}^{(j-1)}_{t|t}\\
+y^{(j)}_{t|t-1}&=\mathbf{H} x^{(j)}_{t|t-1}\\
+\mathbf{F}^{(j)}_{t}&=\mathbf{H}\cdot \mathbf{P}^{(j)}_{t|t-1}\cdot \mathbf{H}'\\
+v^{(j)}{t}&= z_t-y^{(j)}_{t|t-1} 
+\end{align*}
+\item and an update step
+\begin{eqnarray*}\label{eq:update1}
+\mathbf{K}^{(j)}_t  &=&  \mathbf{P}^{(j)}_{t|t-1}\cdot\mathbf{H}'\\
+x^{(j)}_{t|t} &=& x^{(j)}_{t|t-1}+\mathbf{K}^{(j)}_t \left(\mathbf{F}^{(j)}_{t}\right)^{-1}v^{(j)}_t  \nonumber\\ 
+\mathbf{P}^{(j)}_{t|t} &=& \mathbf{P}^{(j)}_{t|t-1}-\mathbf{K}^{(j)}_t\left(\mathbf{F}^{(j)}_{t}\right)^{-1} {\mathbf{K}^{(j)}}'_t. \nonumber
+\end{eqnarray*}
+\item Here, each iteration $j$ follows the standard Kalman recursion.
+\end{itemize}
+	\hyperlink{pkf_pred_upd}{\beamerbutton{Back}}
+\end{frame}
+
+
+
+

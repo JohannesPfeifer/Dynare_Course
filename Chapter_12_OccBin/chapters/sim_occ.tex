@@ -1,0 +1,458 @@
+
+% LTeX: language=en-US
+
+\begin{frame}{Overview}
+    \begin{wideitemize}
+    \item Dynare applies a \hi{perturbation} approach to solve stochastic model: Taylor expansion
+	\item But: OBCs introduce non-differentiability
+    \item OccBin \parencite{GuerrieriIacoviello2015}: handle OBCs using a piecewise linear approach
+    \item OBCs are different regimes of the same model, e.g.:
+    \begin{itemize}
+        \item economy outside the ELB
+        \item economy at the ELB
+    \end{itemize}
+    \item The solution can be highly nonlinear due to feedback loop:
+	\begin{itemize}
+		\item dynamics in one regime depend on its expected duration
+		\item in turn, the expected duration depends on the states
+		\end{itemize}
+    \end{wideitemize}
+\end{frame}
+
+
+\begin{frame}{Strengths and weaknesses}
+    \begin{wideitemize}
+	\item Similar to the linear solutions, the method does not take into account uncertainty (and (precautionary) behaviour towards it)\\
+	$\rightarrow$ solution does not take into account that the constraint(s) could be binding in the future (e.g. because of unrealised shocks).
+	\item But:
+	\begin{itemize}
+		\item it is quite fast and can be used for estimation
+		\item can be applied to very large models
+	\end{itemize}
+    \end{wideitemize}
+\end{frame}
+
+\begin{frame}{Representing two regimes}
+\begin{wideitemize}
+\item The reference/baseline regime (e.g.\ ELB constraint is slack) can be expressed as a linearized system:
+\begin{equation}\label{eq:M1}
+A_1E_t\left[X_{t+1}\right] + A_0X_t  + A_{-1}X_{t-1} +  \mathcal{E} u_t = 0 \: , \tag{M1}
+\end{equation}
+where $X_t$ denotes the model variables in deviation from steady state.
+\item The alternative regime (e.g.\ ELB constraint is binding) features a constant $D^{\ast}$
+\begin{equation}\label{eq:M2}
+A_1^{\ast}E_t\left[X_{t+1}\right] + A_0^{\ast}X_t  + A_{-1}^{\ast}X_{t-1} + D^{\ast}+ \mathcal{E}^{\ast} u_t \tag{M2}
+\end{equation}
+\item Both models \ref{eq:M1} and \ref{eq:M2} are linearized around the same point ($D^*$ accounts for potentially different steady states)
+\item Important: reference regime is the one where the system settles without any shocks
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Regimes and solutions}
+\begin{columns}[T]
+\column{0.5\linewidth}
+\hi{Reference regime (M1)}
+\begin{wideitemize}
+    \item Solution can be written as:
+        \begin{equation}\label{eq:M1DR}
+        X_t = \mathcal{P}X_{t-1} + Cu_t \tag{M1DR}
+        \end{equation}
+        \item Transition matrices $\mathcal{P}$ and $C$ are constant
+        \item Blanchard-Kahn conditions hold
+        \item Provides linearization point
+\end{wideitemize}
+\column{0.5\linewidth}
+\hi{Alternative regime (M2):}
+\begin{wideitemize}
+    \item  Solution   can be written as:
+    \begin{equation}\label{eq:M2DR}
+        X_t =
+            \begin{cases}
+            \mathcal{P}_{t}X_{t-1} + R_t + C_tu_t \, &\text{for } t = 1 \\
+              \mathcal{P}_tX_{t-1} + R_t \, &\text{for } t \geq 2
+            \end{cases}
+            \tag{M2DR}
+        \end{equation}
+        \item Time-varying matrices depending on expected regime length
+\end{wideitemize}
+\end{columns}
+\vspace{1cm}
+\begin{itemize}
+\item Assumes certainty equivalence: system does not depend on $u_{t+j}$ for $j \geq 1$\\
+$\rightarrow$ people expect future shocks to equal their expected value of 0 with certainty
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solution strategy: Backward induction + Guess and verify}
+\begin{wideitemize}
+\item We know terminal condition: if $u_{t} = 0$ for all future periods, system by construction returns to reference regime M1\\
+$\rightarrow$ need to check whether we are indeed back in $M1$ from $T$ onwards (i.e.\ the constraint is slack)
+\item For $t<T$: Regime M2 given state $X_{t-1}$ (and potentially shocks $u_t$)
+\item Guess and verify approach to find regime length:
+\begin{wideenumerate}
+	\item Guess $T$ in period $t_0$ such that for $t \geq T$, we are back in $M1$
+	\item Check whether guess is consistent with implied model dynamics
+	\item If not, update guess
+\end{wideenumerate}
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Working backwards: the terminal period $T$}
+\begin{wideitemize}
+\item For any $t \geq T$ with expected $u_t=0$, the solution in regime $M1$, \eqref{eq:M1DR}, implies:
+\begin{equation}
+X_{t} = \mathcal{P}X_{t-1}
+\end{equation}
+\item For expectations in $T-1$ then follows:
+\begin{equation}
+E_{T-1}\left[X_{T}\right]=\mathcal{P}X_{T-1}
+\end{equation}
+\item This allows eliminating the forward-looking part of the linear system for $M2$:
+\begin{equation}
+\begin{split}
+A_1^{\ast}E_{T-1}\left[X_{T}\right] + A_0^{\ast}X_{T-1}  + A_{-1}^{\ast}X_{T-2} + D^{\ast}&=\\
+A_1^{\ast}{\color{blue}\mathcal{P}X_{T-1}} + A_0^{\ast}X_{T-1}  + A_{-1}^{\ast}X_{T-2} + D^{\ast}&= 0
+  \end{split}
+\end{equation}
+\item Given inherited states $X_{T-2}$, this is a matrix equation in one unknown: $X_{T-1}$
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Working backwards: the solution for $T-1$}
+\begin{wideitemize}
+\item Solve for $X_{T-1}$ given $X_{T-2}$ to get the decision rule:
+\begin{equation}
+  X_{T-1} = -\left(A_1^{\ast}\mathcal{P}+A_0^{\ast}\right)^{-1}\left(A_{-1}^{\ast}X_{T-2}+D^{\ast}\right)
+\end{equation}
+\item Looks complicated, but is actually linear:
+\begin{equation}
+  X_{T-1} =  \underbrace{\mathcal{P}_{T-1}}_{-\left(A_1^{\ast}\mathcal{P}+A_0^{\ast}\right)^{-1}A_{-1}^{\ast}}X_{T-2}
+  + \underbrace{R_{T-1}}_{-\left(A_1^{\ast}\mathcal{P}+A_0^{\ast}\right)^{-1}D^{\ast}}
+\end{equation}
+\item Linearity allows for easy evaluation of conditional expectations $E_{T-2}[X_{T-1}]$ required in $T-2$
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Working backwards until the first period}
+\begin{wideitemize}
+\item Continue the drill with the previous period $T-2$:
+\begin{equation}
+  A_1^{\ast}\mathcal{P}_{T-1}X_{T-2} + A_0^{\ast}X_{T-2}  + A_{-1}^{\ast}X_{T-3} + D^{\ast}= 0
+\end{equation}
+\item Solve for $X_{T-2}$ given $X_{T-3}$ to get the decision rule:
+\begin{equation}
+	X_{T-2} =    \mathcal{P}_{T-2}X_{T-3}+ R_{T-2}
+\end{equation}
+with
+\begin{align}
+\mathcal{P}_{T-2} &= -\left(A_1^{\ast}\mathcal{P}_{T-1}+A_0^{\ast}\right)^{-1}A_{-1}^{\ast}\\
+R_{T-2} &= -\left(A_1^{\ast}\mathcal{P}_{T-1}+A_0^{\ast}\right)^{-1}D^{\ast}
+\end{align}
+\item $\mathcal{P}_t, R_t$ and later $C_t$ are time-varying matrices composed of structural matrices in M1 and M2\\
+$\rightarrow$ nonlinear dynamics
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{Working backwards: the first period}
+\begin{wideitemize}
+\item We finally reach the first period $t=1$:
+\begin{equation}
+  A_1^{\ast}\mathcal{P}_{2}X_{1} + A_0^{\ast}X_{1}  + A_{-1}^{\ast}X_{0} + D^{\ast}+ \mathcal{E}^{\ast} u_1= 0
+\end{equation}
+\item Solve for $X_{1}$ given $X_{0}$ and current shock $u_1$ to get the decision rule:
+\begin{equation}
+	X_{1} =    \mathcal{P}_{1}X_{0}+ R_{1}+C_1 u_1
+\end{equation}
+with
+\begin{align}
+\mathcal{P}_{1} &= -\left(A_1^{\ast}\mathcal{P}_{2}+A_0^{\ast}\right)^{-1}A_{0}^{\ast}\\
+R_{1} &= -\left(A_1^{\ast}\mathcal{P}_{2}+A_0^{\ast}\right)^{-1}D^{\ast}\\
+C_{1} &= -\left(A_1^{\ast}\mathcal{P}_{2}+A_0^{\ast}\right)^{-1}\mathcal{E}^{\ast}
+\end{align}
+\item This completes the computation of the solution \eqref{eq:M2DR}
+\end{wideitemize}
+\end{frame}
+
+
+\begin{frame}{Verification}
+\begin{wideitemize}
+\item We now have obtained time-dependent decision rules for all periods, but conditional on potentially wrongly guessed $T$\\
+\item Is behavior of economy starting from $X_0$ with given shock $\varepsilon_1$ consistent with conjectured decision rules?\\
+$\rightarrow$  compute (time) path for $X_{t+j}$ and implied reversal to the baseline regime $\tilde T$
+\item If $\tilde T =T$ is verified: we have found a solution!
+\item If not, update the guess for the regime sequence and back to square one
+	\begin{itemize}
+		\item Make use of the computed path for $X_t$ to update the next guess (default)
+		\item Other updating schemes are possible (e.g.\ step-wise changes of the regime guess:\\ \texttt{simul\_curb\_retrench})
+	\end{itemize}
+\item Multiple solutions: multiple regime sequences possible \parencite{Holden2022}
+\end{wideitemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{OccBin model block}
+\begin{wideitemize}
+\item Equation \texttt{name} tags are used to name equations
+\item \texttt{bind} and \texttt{relax}-tags assign equation pairs to the alternative and the reference regime, respectively, associated with the constraint named \texttt{zlb}
+\begin{minted}{c++}
+[name='Notional rate Taylor rule']
+inomnot=(1-rhoinom)*inomnot(-1)
+        +rhoinom*(phi_pi*pie+phi_y*y)+zeps_i;
+
+[name = 'Observed interest rate',relax='zlb']
+inom = inomnot;
+
+[name = 'Observed interest rate',bind='zlb']
+inom = ilb;
+\end{minted}
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}[fragile]{OccBin constraints definition}
+\begin{wideitemize}
+\item Declare regime switching condition
+\begin{minted}{c++}
+occbin_constraints;
+name 'zlb'; bind inomnot<=ilb;
+end;
+\end{minted}
+which is equivalent to
+\begin{minted}{c++}
+occbin_constraints;
+name 'zlb'; bind inomnot<=ilb; relax inomnot>ilb;
+end;
+\end{minted}
+\item Explicit \texttt{relax}-tags are required when \texttt{bind}-expression cannot be evaluated in alternative regime
+\end{wideitemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{OccBin constraints: numerical considerations}
+\begin{wideitemize}
+\item In each simulation period, Dynare will check the respective conditions to see whether a regime change takes place\\
+    $\rightarrow$ numerical imprecisions can cause spurious changes at the boundary between regimes
+\item Useful trick: introducing a safety buffer:
+\begin{minted}{c++}
+occbin_constraints;
+name 'zlb'; bind inomnot<=ilb-1e-8; relax inomnot>ilb+1e-8;
+end;
+\end{minted}
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}[fragile]{Defining surprise shocks}
+\begin{minted}{c++}
+shockssequence = -0.01;
+
+shocks(surprise);
+    var u_c;
+    periods 1;
+    values(shockssequence);
+end;
+\end{minted}
+\begin{wideitemize}
+  \item Keyword \texttt{surprise} of \texttt{shocks}-block indicates that perfect foresight syntax is used, but future shocks are not anticipated
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}[fragile]{Triggering OccBin simulations}
+\begin{minted}{c++}
+occbin_setup; //instruct OccBin use
+occbin_solver(simul_periods=20,simul_check_ahead_periods=50);
+occbin_graph y inom inomnot pie;
+\end{minted}
+\begin{wideitemize}
+  \item \texttt{occbin\_setup} is mandatory to trigger the use of the OccBin toolkit (translates\\ \texttt{shocks(surprise)-block})
+  \item \texttt{occbin\_solver} triggers actual simulation run
+  \begin{itemize}
+    \item \texttt{simul\_periods}: number of periods for which to compute simulation
+    \item \texttt{simul\_check\_ahead\_periods}: initial guess for period $T$ at which regime returns to baseline
+  \end{itemize}
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{OccBin output}
+\begin{wideitemize}
+\item Dynare stores all OccBin simulation-related output in \texttt{oo\_.occbin.simul}
+\begin{wideitemize}
+  \item the simulated solution paths in \texttt{oo\_.occbin.simul.endo\_piecewise}
+  \item the linear simulation when ignoring the constraints in \texttt{oo\_.occbin.simul.endo\_linear}
+  \item an error-flag in \texttt{oo\_.occbin.simul.error\_flag}
+  \item the regime and its expected duration in \texttt{oo\_.occbin.simul.regime\_history}
+\end{wideitemize}
+\item Details can be found in the manual
+\end{wideitemize}
+\end{frame}
+
+\begin{frame}{OccBin: nonlinear models}
+\begin{wideitemize}
+\item Dynare's implementation can handle non-linearly entered models\\
+$\rightarrow$ Dynare will do the linearization
+\item Attention: expressions within \texttt{occbin\_constraints}-block are not linearized (yet)\\
+$\rightarrow$ risk for inconsistency
+\end{wideitemize}
+\end{frame}
+
+%\begin{frame}{Hands-on}
+%\begin{wideitemize}
+%\item Let's look at the \hi{code for OccBin simulations} in practice.
+%\end{wideitemize}
+%\end{frame}
+%
+%\subsection{OBCs with Kuhn-Tucker constraints}
+%\begin{frame}{Bonus: Kuhn-Tucker}
+%\begin{wideitemize}
+%\item The ELB constraint was relatively easy to implement. The lower bound does not contain choice  variables.
+%\item Now we consider the model used in \textcite{cuba2019likelihood}
+%\item This model with endogenous borrowing constraints can be cast into a Kuhn-Tucker framework
+%\item It is the core of many modern macro models with nonlinearities such as Mendoza (2006), Bocola
+%(2016), and He and Krishnamurthy (2011).
+%\end{wideitemize}
+%\end{frame}
+%
+%
+%\begin{frame}{Consumption savings under borrowing constraints}
+%\begin{wideitemize}
+%\item A consumer maximises utility from consumption $C_t$
+%\begin{equation*}
+%    \max E_0 \sum_{t=0}^{\infty}\beta^t\frac{C^{1-\gamma}}{1-\gamma}
+%\end{equation*}
+%subject to the budget constraint:
+%\begin{equation*}
+%    C_t + RB_{t-1} = Y_t + B_t
+%\end{equation*}
+%with gross interest rate $R$ and a constraint on borrowing $B_t$ with attached multiplier $\lambda_t$
+%\begin{equation*}
+%    B_t \leq mY_t
+%\end{equation*}
+%\item Income is stochastic:
+%\begin{equation*}
+%    \log(Y_t) = \rho \log(Y_{t-1})+ \sigma \varepsilon_t.
+%\end{equation*}
+%\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}{Equilibrium}
+%\begin{wideitemize}
+%\item Intertemporal consumption optimality:
+%\begin{equation*}
+%  C_t^{-\gamma} = \beta R E_t\left[C_{t+1}^{-\gamma}\right]+\lambda_t
+%\end{equation*}
+%\item A Kuhn-Tucker condition ($\lambda_t$ gives the value of relaxing the borrowing constraint):
+%\begin{equation*}
+%    \lambda_t \left(B_t-mY_t\right)=0
+%\end{equation*}
+%\begin{itemize}
+%\item If income and assets are low: Borrowing constraint (more likely) binds
+%\item If income and assets are high: Borrowing can be relatively high relative to future consumption even if borrowing remains below the maximum allowed.
+%\end{itemize}
+%\item For higher-than-average income realisations, consumption is
+%sufficiently high today relative to the future that it is optimal to save for the future.
+%\item The borrowing constraint
+%becomes temporarily slack ($\lambda_t > 0$).
+%\end{wideitemize}
+%\end{frame}
+%
+%\begin{frame}[fragile]{Bringing the model into the computer}
+%\smartdiagramset{back arrow disabled,module minimum width=2.cm,font=\footnotesize}
+%\smartdiagram[flow diagram:horizontal]{Preamble, Model definition, Steady state, Simulation and estimation}
+%\end{frame}
+%
+%
+%\begin{frame}[fragile]{Preamble}
+%\begin{columns}
+%\begin{column}[T]{0.4\textwidth}
+%	    \begin{wideitemize}
+%	        \item Endogenous variables: $B_t, C_t, Y_t, \lambda_t$
+%	        \item Exogenous variables (shocks): $\varepsilon_t$
+%	        \item Parameters: $ \beta, \gamma, m, \rho, R, \sigma$
+%	        \item We take the calibration from Cuba-Borda et al. (2019)
+%	    \end{wideitemize}
+%\end{column}
+%\begin{column}[T]{0.6\textwidth}
+%\begin{minted}{c++}
+%var b  c lam y ;
+%varexo u_u ;
+%parameters BETA, M, R, RHO,
+%SIG, GAMMAC;
+%
+%BETA = 0.945;
+%GAMMAC = 1;
+%RHO   = 0.9;
+%R = 1.05;
+%SIG = 0.01;
+%M = 1;
+%\end{minted}
+%\end{column}
+%\end{columns}
+%\end{frame}
+%
+%\begin{frame}[fragile]{Model definition}
+%\begin{columns}
+%\begin{column}[T]{0.35\textwidth}
+%	    \begin{wideitemize}
+%	        \item $C_t  = Y_t + B_t -RB_{t-1}$
+%	        \item $C_t^{-\gamma} = \beta R E_t\left[C_{t+1}^{-\gamma}\right]+\lambda_t$
+%	        \item $\log(Y_t) = \rho \log(Y_{t-1})+ \sigma \varepsilon_t$
+%	        \item $\lambda_t \left(B_t-mY_t\right)=0$
+%	    \end{wideitemize}
+%\end{column}
+%\begin{column}[T]{0.65\textwidth}
+%\begin{minted}{c++}
+%model;
+%[name = 'Budget constraint']
+%c = y + b - R*b(-1) ; //
+%[name = 'Euler equation']
+%1/c^GAMMAC = BETA*R/c(+1)^GAMMAC + lam ;
+%[name = 'Stochastic income']
+%log(y) = RHO*log(y(-1)) + SIG*eps_u;
+%[name = 'KT-constraint', relax='BORRCON']
+%(b -  M*y) = 0 ;  //
+%[name = 'KT-constraint', bind='BORRCON']
+%lam = 0 ;
+%end;
+%\end{minted}
+%\end{column}
+%\end{columns}
+%\end{frame}
+%
+%\begin{frame}[fragile]{Steady state}
+%\begin{columns}
+%\begin{column}[T]{0.4\textwidth}
+%	    \begin{wideitemize}
+%	        \item Based on a unit income, we can find the steady state.
+%	        \item The household is borrowing constrained.
+%	        \item Consumption equals income minus the steady-state debt service cost.
+%	    \end{wideitemize}
+%\end{column}
+%\begin{column}[T]{0.6\textwidth}
+%\begin{minted}{c++}
+%steady_state_model;
+%b=M;
+%y=1;
+%c=y+M-R*M;
+%lam=(1-BETA*R)/c^GAMMAC;
+%end;
+%\end{minted}
+%\end{column}
+%\end{columns}
+%\end{frame}
+%
+%\begin{frame}[fragile]{Declare OBCs}
+%\begin{minted}{c++}
+%occbin_constraints;
+%name 'BORRCON'; bind lam < 0; relax b > M*y;
+%end;
+%\end{minted}
+%\begin{itemize}
+%    \item Trick: Define constraint in terms of $\lambda$.
+%    \item The rest of the simulation is coded up for you in the examples.
+%\end{itemize}
+%\end{frame}
+%
+%\begin{frame}{Hands-on}
+%\begin{wideitemize}
+%\item Let's look at the \hi{code for OccBin simulations} for this model.
+%\end{wideitemize}
+%\end{frame} 

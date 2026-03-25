@@ -1,0 +1,713 @@
+% LTeX: language=en-US
+
+\documentclass[handout,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[beamer,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[trans,notes=show,usepdftitle=false,aspectratio=169]{beamer}
+
+\input{../Preamble/preamble.tex}
+
+\usepackage{smartdiagram}
+
+\usepackage{upquote}
+
+
+\begin{document}
+
+
+\title[]{\textbf{Advanced Dynare\\}
+  \medskip{Chapter XIV}\\
+  \emph{Optimal Policy and Welfare Assessment}
+}
+
+\author{Johannes Pfeifer}
+\input{../date_place.txt}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+
+\maketitle
+%\include{Intro}
+\begin{frame}
+  \frametitle{Outline}
+  \tableofcontents%[onlyparts]
+\end{frame}
+
+
+
+\section{Introduction}
+
+\begin{frame}{Motivation}
+  \begin{witemize}
+    \item Policy-makers are often interested in implementing some form of optimal policy
+    \item Typical problem structure involves:
+    \begin{enumerate}
+      \item optimizing some welfare of loss criterion,
+      \item taking into account private sector reactions to policy changes
+      \item while being constrained by technologies, institutions, etc.
+    \end{enumerate}
+    \item Welfare analysis allows
+    \begin{witemize}
+      \item model-consistent comparison of policies and institutions
+      \item preventing socially inefficient equilibria
+    \end{witemize}
+  \end{witemize}
+\end{frame}
+
+\begin{frame}{Rules vs. discretion}
+  \begin{witemize}
+    \item In dynamic models, private sector expectations about government behavior matter for private decision-making \parencite[e.g.][]{Lucas1976}
+    \item However: government may have incentive to renege on earlier promises made to private sector (time-consistency problem of \textcite{KydlandPrescott1977})
+    \item If private sector anticipates reneging, it will adjust its behavior accordingly\\
+    $\rightarrow$ policy-tradeoffs like sacrifice ratio can become more expensive
+    \item Solution may be credibly committing to future policy actions
+  \end{witemize}
+\end{frame}
+
+\begin{frame}{Two important conceptual distinctions}
+  \begin{witemize}
+    \item First important conceptual distinction between
+    \begin{enumerate}
+      \item \highlight{discretionary policy}\\
+            $\rightarrow$ policy-maker re-optimizes period-by-period
+      \item optimal policy under \highlight{commitment}\\
+            $\rightarrow$ announce a policy plan and stick to it no matter what
+    \end{enumerate}
+    \item Policy under commitment in turn can be classified in two kinds of policies
+    \begin{enumerate}
+      \item fully state-contingent, i.e. \highlight{Ramsey} optimal policy\\
+            $\rightarrow$ first-best policy that can optimally react to all state variables including shocks
+      \item \highlight{optimal simple rules (OSR)}\\
+            $\rightarrow$ policy rule restricted to a specific functional form (e.g.\ Taylor rule or fiscal feedback)
+    \end{enumerate}
+    \item OSR is easier to communicate and implement, but may only be associated with a small welfare loss compared to Ramsey policy \parencite[e.g.][]{SGU2007}
+  \end{witemize}
+\end{frame}
+
+\section{Optimal policy under commitment}
+
+\subsection{Theory}
+
+\begin{frame}{General case}
+
+  \begin{witemize}
+    \item  The generic Ramsey problem can be written as
+          \begin{equation}
+            \max_{\left\{y_t\right\}_{t=0}^\infty} \mathbb{E}_0 \sum_{t=0}^\infty\beta^{t}U(y_t)  \: ,
+          \end{equation}
+          where $U()$ is the planner objective and $\beta$ the planner discount factor
+    \item Optimization is conducted subject to the private sector equilibrium conditions:
+          \begin{equation}
+            \mathbb{E}_{t}f(y_{t+1}, y_{t}, y_{t-1}, \varepsilon_{t})=0,~\forall \:  t \geq 0 \: ,
+          \end{equation}
+          taking $y_{-1}$ as given and imposing suitable transversality conditions, where
+          \begin{itemize}
+            \item $y_t\in \mathbb{R}^n$: endogenous variables
+            \item $\varepsilon_t\in \mathbb{R}^p$: stochastic innovations
+            \item $f~:~\mathbb{R}^{3n+p} \rightarrow \mathbb{R}^m$
+          \end{itemize}
+    \item There are $n-m$ free policy instruments
+  \end{witemize}
+\end{frame}
+
+\begin{frame}{The Ramsey planner's Lagrangian}
+  \begin{witemize}
+    \item Denoting with $\mu_t \in \mathbb{R}^m$ the vector of \emph{discounted} Lagrange multipliers, the Lagrangian of the Ramsey problem is given by
+    \begin{equation}
+      \mathcal{L} = \mathbb{E}_0 \sum_{t=0}^\infty\beta^{t} \left( U(y_t) - \mu_t' f(y_{t+1}, y_{t}, y_{t-1}, \varepsilon_{t}) \right)
+    \end{equation}
+    \item Dynare will automatically construct this Lagrangian internally and compute the necessary first order conditions if a \texttt{ramsey\_model} statement is present
+    \item Resulting first-order conditions can be inspected using Dynare's \LaTeX\ export functionality (\texttt{write\_latex\_dynamic\_model})
+  \end{witemize}
+\end{frame}
+
+\begin{frame}{First order necessary conditions}
+  \begin{itemize}
+    \item The first order necessary conditions (FOC) for an optimum are given by
+          \begin{align}
+            0= \frac{\partial \mathcal{L}}{\partial \mu_t} = \mathbb{E}_0 & f(y_{t+1}, y_{t}, y_{t-1}, \varepsilon_{t}),~t\geq 0                                                                                                                                                                                                                                      \\
+            0=\frac{\partial \mathcal{L}}{\partial y_0} = \mathbb{E}_0    & \left\{ U' (y_0) - \mu_0 ' \left. \frac{\partial f}{\partial y_t} \right|_{\left( y_1, y_0, y_{-1}, \epsilon_0 \right)} - \beta \mu_1 ' \left. \frac{\partial f}{\partial y_{t-1}} \right|_{ \left( y_2, y_1, y_{0}, \epsilon_1 \right) } \right\}                   \label{eq:ramsey_t0}
+            \\
+            0=\frac{\partial \mathcal{L}}{\partial y_t} = \mathbb{E}_0    & \left\{ U' (y_t) - \beta^{-1}\mu_{t-1} ' \left. \frac{\partial f}{\partial y_{t+1}} \right|_{\left( y_{t}, y_{t-1}, y_{t-2}, \epsilon_{t-1} \right)}\right.     \notag
+            \\
+                                                                          & \left. - \mu_t' \left. \frac{\partial f}{\partial y_{t}} \right|_{\left( y_{t+1}, y_{t}, y_{t-1}, \epsilon_{t} \right)} - \beta \mu_{t+1}' \left. \frac{\partial f}{\partial y_{t-1}} \right|_{\left( y_{t+2}, y_{t+1}, y_{t}, \epsilon_{t+1} \right)} \right\},~t>0 \label{eq:ramsey_t}
+          \end{align}
+    \item First period is special, rendering the problem non-time invariant (and time-inconsistent)!
+    \item However: \eqref{eq:ramsey_t} reduces to \eqref{eq:ramsey_t0} with the initial Lagrange multiplier set to $\mu_{-1}=0$
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Inspecting the structure}
+  \begin{witemize}
+    \item  With $\mu_{-1}=0$, we have a time-invariant non-linear system of rational expectation equations for all $t$:
+    \begin{align}
+      0= \frac{\partial \mathcal{L}}{\partial \mu_t} = \mathbb{E}_0 & f(y_{t+1}, y_{t}, y_{t-1}, \varepsilon_{t}),                                                                                                                                                                                                                         \\
+      0=\frac{\partial \mathcal{L}}{\partial y_t} = \mathbb{E}_0    & \left\{ U' (y_t) - \beta^{-1}\mu_{t-1} ' \left. \frac{\partial f}{\partial y_{t+1}} \right|_{\left( y_{t}, y_{t-1}, y_{t-2}, \epsilon_{t-1} \right)}\right.     \notag
+      \\
+                                                                    & \left. - \mu_t' \left. \frac{\partial f}{\partial y_{t}} \right|_{\left( y_{t+1}, y_{t}, y_{t-1}, \epsilon_{t} \right)} - \beta \mu_{t+1}' \left. \frac{\partial f}{\partial y_{t-1}} \right|_{\left( y_{t+2}, y_{t+1}, y_{t}, \epsilon_{t+1} \right)} \right\} \: ,
+    \end{align}
+    given initial and transversality conditions
+    \item System is amenable to both perfect foresight solver and k-order perturbation methods
+  \end{witemize}
+
+\end{frame}
+
+\begin{frame}{Steady state}
+  \begin{witemize}
+    \item Perturbation of the non-linear system can be accurate because, in the absence of shocks, the system may converge to a well-defined steady state
+    \item However: need to find a steady state for both $\mu$ and $y$ first
+    \item The steady-state values $\overline{y}$ and $\overline{\mu}$ need to satisfy
+    \begin{align}
+       & f(\overline{y}, \overline{y}, \overline{y}, 0) = 0                                                                                                                                                                                                                                                                                                                                                                                     \\
+       & U' \left(\overline{y} \right) - \overline{\mu} ' \left( \beta^{-1} \left. \frac{\partial f}{\partial y_{t+1}} \right|_{\left( \overline{y}, \overline{y}, \overline{y}, 0 \right)} + \left. \frac{\partial f}{\partial y_{t}} \right|_{\left( \overline{y}, \overline{y}, \overline{y}, 0 \right)} + \beta \left. \frac{\partial f}{\partial y_{t-1}} \right|_{\left( \overline{y}, \overline{y}, \overline{y}, 0 \right)} \right) = 0
+    \end{align}
+    \item That is a potentially large non-linear system to solve!
+  \end{witemize}
+\end{frame}
+
+\begin{frame}{Using a conditional steady state}
+  \begin{witemize}
+    \item Problem can be simplified if a conditional steady state can be provided for $y$
+    \item Take the planner instruments like the interest rate as given and compute the corresponding steady state of the private sector\\
+    $\rightarrow$ implies a steady state candidate $\tilde y$
+    \item Given $\tilde y$, we need to solve a linear equation to obtain $\tilde \mu$:
+    \begin{align}
+       & U' \left(\tilde{y} \right) - \tilde{\mu} ' \underbrace{\left( \beta^{-1} \left. \frac{\partial f}{\partial y_{t+1}} \right|_{\left( \tilde{y}, \tilde{y}, \tilde{y}, 0 \right)} + \left. \frac{\partial f}{\partial y_{t}} \right|_{\left( \tilde{y}, \tilde{y}, \tilde{y}, 0 \right)} + \beta \left. \frac{\partial f}{\partial y_{t-1}} \right|_{\left( \tilde{y}, \tilde{y}, \tilde{y}, 0 \right)} \right)}_M = U' \left(\tilde{y} \right) - \tilde{\mu} 'M= 0
+    \end{align}
+    \item Iterate on value of instruments until convergence of $\tilde y$ and $\tilde \mu$ to $\overline y$ and $\tilde \mu$\\
+    $\rightarrow$ increases success probability of finding steady state to the problem
+    \item However: steady state may not be unique\\
+    $\rightarrow$ starting point for the instruments may matter
+  \end{witemize}
+\end{frame}
+
+
+\begin{frame}{Welfare assessment}
+  \begin{witemize}
+    \item We are often interested in explicitly evaluating the welfare function
+    \begin{equation}
+      \max_{\left\{y_t\right\}_{t=0}^\infty} \mathbb{E}_0 \sum_{t=0}^\infty\beta^{t}U(y_t)  \: ,
+    \end{equation}
+    \item Welfare at time $t$ can be recursively written (making dependence on state variables $x_{t-1}$ and shocks $\varepsilon_t$ explicit):
+    \begin{align}
+      W\left( x_{t-1}, \varepsilon_t \right) = U\left( x_{t-1}, \varepsilon_t \right) + \beta \mathbb{E}_t W\left( x_{t}, \varepsilon_{t+1} \right)
+    \end{align}
+    \item Careful: welfare objective cannot be included in the \texttt{model} block as it will cause singularity
+    \item \texttt{evaluate\_planner\_objective} allows evaluating this function
+    \item Important: proper welfare assessment typically requires at least a second-order approximation of the model, unless there is an undistorted steady state \parencite{Woodford2002}
+  \end{witemize}
+\end{frame}
+
+
+\begin{frame}{Conditional vs. unconditional welfare}
+  \begin{itemize}
+    \item \texttt{evaluate\_planner\_objective} reports two different welfare measures commonly of interest to policy-makers:
+  \end{itemize}
+          \begin{enumerate}
+            \item Conditional welfare at time $t=0$:
+                  \begin{align}
+                    W \left( x_{-1}, \varepsilon_0, \right)
+                  \end{align}
+
+                  \begin{itemize}
+                     \item takes into account the dynamics starting from the initial state $x_{-1}$ and the observed current shock $\varepsilon_0$
+                     \item allows accounting for transition behavior from old policy regime to new optimal policy regime
+                     \item Dynare reports value for two particular initial multipliers $\mu_{-1}$ states:
+                           \begin{itemize}
+                             \item $\mu_{-1} = \overline{\mu}$ (steady state multiplier)
+                             \item $\mu_{-1} = 0$ (no initial commitment by planner)
+                           \end{itemize}
+                  \end{itemize}
+            \item Unconditional welfare
+                  \begin{align}
+                    \mathbb{E}\left[ W\left( x_{t-1}, \varepsilon_t, \right) \right] = \frac{\mathbb{E}\left[U\left( x_{t-1}, \varepsilon_t, \right)\right]}{1-\beta}
+                  \end{align}
+                  $\rightarrow$ corresponds to the long-run expected value of welfare
+          \end{enumerate}
+\end{frame}
+
+
+\subsection{Practice}
+
+\begin{frame}{In Dynare}
+  \begin{witemize}
+    \item $U$ is stated in the \texttt{planner\_objective} command
+    \item \texttt{ramsey\_constraints} block contains constraints, e.g. ZLB
+    \item \texttt{ramsey\_model} command generates the FOC with options
+          \begin{itemize}
+            \item \texttt{planner\_discount}: central planner's discount factor
+            \item \texttt{instruments}: variables for the computation of the steady state unde optimal policy\\
+                  $\rightarrow$ \texttt{steady\_state\_model} block or \texttt{\_steadystate.m} file
+          \end{itemize}
+    \item \texttt{initval}: initial instruments values
+    \item \texttt{histval}: initial state variables values
+    \item \texttt{shocks}: specifies $\varepsilon_0$
+    \item call \texttt{stoch\_simul} and \texttt{evaluate\_planner\_objective}
+  \end{witemize}
+\end{frame}
+
+
+\begin{frame}{Dynare output}
+  \begin{witemize}
+    \item \texttt{oo\_.planner\_objective\_value} subfields:
+          \begin{witemize}
+            \item \texttt{unconditional} contains $\mathbb{E} [W]$
+            \item \texttt{conditional} contains $W \left( x_{-1}, \varepsilon_0 \right)$ in subfields
+                  \begin{itemize}
+                    \item \texttt{steady\_initial\_multiplier} when $\mu_{-1} = \overline{\mu}$
+                    \item \texttt{zero\_initial\_multiplier} when $\mu_{-1} = 0$\\
+                          $\rightarrow$ optimal policy surprise for private agents!
+                  \end{itemize}
+          \end{witemize}
+  \end{witemize}
+\end{frame}
+
+
+\begin{frame}{A New-Keynesian model}
+  \begin{itemize}
+    \item Consider model based on \textcite{CMR2007} \\
+    $\rightarrow$ shipped with Dynare (\texttt{Ramsey\_Example.mod})
+    \item Representative household chooses consumption $C_t$ and hours worked $h_t$ to maximize discounted utility
+          \begin{equation}
+            \mathbb{E}_0 \sum_{t=0}^\infty\beta^{t} \left[ \log \left( C_t \right) -\frac{\chi}{2} h_{t}^2\right]
+          \end{equation}
+    \item The budget constraint is given by
+          \begin{equation}
+            \frac{B_{t}}{P_t} =
+            (1+r_{t-1})\frac{B_{t-1}}{P_t}-C_{t}+\frac{W_t}{P_t}h_{t} +\Theta_{t} \: ,
+          \end{equation}
+          where
+          \begin{itemize}
+            \item $B_t$: nominal private bonds (in zero net supply)
+            \item $r_t$: nominal net interest rate
+            \item $W_t$: nominal wage
+            \item $\Theta_t$: firm profits
+            \item $P_t$: price level
+          \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Household FOCs}
+  \begin{itemize}
+    \item The consumption FOC is given by the familiar Euler equation
+          \begin{equation}
+            \frac{1}{C_{t}} =\beta \mathbb{E}_{t}\left \{\frac{1}{C_{t+1}}\frac{1+r_{t}}{\Pi_{t+1}}\right \} \: ,                                                                        \end{equation}
+          where $\Pi_t$ is the inflation rate
+    \item The labor FOC can be written as
+          \begin{equation}\label{eq:labor}
+            \chi h_tC_t=\frac{W_t}{P_t}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Firm setup}
+  \begin{itemize}
+    \item There is a continuum of monopolistically competitive firms $j$ with pricing power
+    \item Production is linear in labor
+          \begin{equation}
+            C_{i,t}=e^{Z_t}h_{i,t} \: ,
+          \end{equation}
+          with TFP $Z_t$ following
+          \begin{equation}
+            Z_t = \rho Z_{t-1} + u_t \: , u \overset{iid}{\sim}\mathcal{N}(0,\sigma_z^2)
+          \end{equation}
+    \item Firm $j$ faces a downward-sloping demand curve for its variety
+          \begin{equation}
+            C_{j,t} = \left(\frac{P_{j,t}}{P_t}\right)^{-\theta} \: ,
+          \end{equation}
+          where $\theta$ is the Dixit-Stiglitz elasticity of substitution
+    \item Price adjustment is subject to a \textcite{Rotemberg1982} quadratic cost
+          \begin{equation}
+            \frac{\phi}{2}\left(\frac{P_{j,t}}{P_{j,t-1}}-1\right)^2 C_{j,t}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Firm problem}
+  \begin{itemize}
+    \item Firm $j$ maximizes its after-tax profits
+          \begin{equation}
+            (1+\tau)\frac{P_{j,t}}{P_t}C_{j,t}-MC_t C_{j,t}-\frac{\phi}{2}\left(\frac{P_{j,t}}{P_{j,t-1}}-1\right)^2 C_{j,t} \: ,
+          \end{equation}
+          where marginal cost is common to all firms:
+          \begin{equation}
+            MC_t = \frac{W_t}{P_t e^{Z_t}} \overset{\eqref{eq:labor}}{=} \frac{\chi h_tC_t}{e^{Z_t}}
+          \end{equation}
+    \item In a symmetric equilibrium, the pricing FOC is the well-known New Keynesian Phillips curve
+          \begin{equation}
+            \left[\tau-\frac{1}{\theta-1}\right](1-\theta) +\theta\left(\frac{\chi
+              h_t C_t}{e^{Z_t}}-1\right) = \phi(\Pi_t-1)\Pi_t - \beta \mathbb{E}_t\phi(\Pi_{t+1}-1)\Pi_{t+-1}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Private sector equilibrium}
+  \begin{itemize}
+    \item In equilibrium, the private sector FOCs given monetary policy can be represented as
+          \begin{align}
+            \frac{1}{C_{t}}            & =\beta \mathbb{E}_{t}\left \{ \frac{1}{C_{t+1}}\frac{1+r_{t}}{\Pi
+            _{t+1}}\right \}                                                                                 \\
+            \left[\tau-\frac{1}{\theta-1}\right](1-\theta) +\theta\left(\frac{\chi
+            h_t C_t}{e^{Z_t}}-1\right) & = \phi(\Pi_t-1)\Pi_t - \beta \mathbb{E}_t\phi(\Pi_{t+1}-1)\Pi_{t+1} \\
+            e^{Z_{t}}h_{t}             & = C_{t}\left[1+\frac{\phi }{2}\left( \Pi _{t}-1\right) ^{2}\right]  \\
+            Z_t                        & = \rho Z_{t-1} + u_t
+          \end{align}
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Ramsey problem}
+  \begin{itemize}
+    \item The corresponding Ramsey problem is given by
+          \begin{equation}
+            \begin{split}
+              \max \mathbb{E}_{0}\sum_{t=0}^\infty & \beta ^{t}\Bigg\{ \ln C_{t}-\frac{\chi}{2}h_t^2 -\mu_{1,t}\left( \frac{1}{C_{t}}- \beta \frac{1}{C_{t+1}}\frac{1+r_{t}}{\Pi
+              _{t+1}}\right)                                                                                                                                                     \\
+                                                   & -\mu_{2,t}\Bigg(  \left[\tau-\frac{1}{\theta-1}\right](1-\theta) +\theta\left(\frac{\chi
+              h_t C_t}{e^{Z_t}}-1\right)                                                                                                                                         \\
+                                                   & \quad\quad\quad- \phi(\Pi_t-1)\Pi_t + \beta \phi(\Pi_{t+1}-1)\Pi_{t-1}\Bigg)                                                \\
+                                                   & -\mu _{3,t}\left(e^{Z_{t}}h_{t} - C_{t}\left[1+\frac{\phi }{2}\left( \Pi _{t}-1\right) ^{2}\right]\right)                   \\
+                                                   & -\mu_{4,t}\left(Z_t - \rho Z_{t-1} - u_t\right)\Bigg\}
+            \end{split}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Dynare code}{\texttt{Ramsey\_Example\_commitment.mod}}
+  \begin{itemize}
+    \item We declare all 5 variables, including the interest rate set by the Ramsey planner:
+  \end{itemize}
+  \small
+  \begin{minted}{c++}
+var(log) C  $C$                 (long_name='Consumption')
+    pi      $\pi$               (long_name='Gross inflation')
+    h       $h$                 (long_name='hours worked');
+
+var Z       $Z$                 (long_name='TFP')
+    r       $r$                 (long_name='Net nominal interest rate');
+
+varexo epsilon ${\varepsilon}$     (long_name='TFP shock');
+parameters beta     ${\beta}$       (long_name='discount factor')
+        theta       ${\theta}$      (long_name='substitution elasticity')
+        tau         ${\tau}$        (long_name='labor subsidy')
+        chi         ${\chi}$        (long_name='labor disutility')
+        phi         ${\phi}$        (long_name='price adjustment costs')
+        rho         ${\rho}$        (long_name='TFP autocorrelation');
+\end{minted}
+\end{frame}
+
+
+
+% \begin{frame}[fragile]{Dynare code: \texttt{Ramsey\_Example\_commitment.mod}}
+%   \begin{itemize}
+%     \item We declare all 5 variables, including the interest rate set by the Ramsey planner:
+%   \end{itemize}
+%   \begin{minted}{c++}
+% beta=0.99;
+% theta=5;
+% phi=100;
+% rho=0.9;
+% tau=1/(theta-1);
+% chi=1;
+
+% \end{minted}
+% \end{frame}
+
+\begin{frame}[fragile]{Dynare code (continued)}
+  \begin{itemize}
+    \item The model only features 4 equations for 5 variables:
+  \end{itemize}
+  \begin{minted}{c++}
+model;
+    [name='Euler equation']
+    1/(1+r)=beta*C/(C(+1)*pi(+1));
+    [name='Firm FOC']
+    (tau-1/(theta-1))*(1-theta)+theta*(chi*h*C/(exp(Z))-1)=
+        phi*(pi-1)*pi-beta*phi*(pi(+1)-1)*pi(+1);
+    [name='Resource constraint']
+    C*(1+phi/2*(pi-1)^2)=exp(Z)*h;
+    [name='TFP process']
+    Z=rho*Z(-1)+epsilon;
+ end;
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Dynare code (continued)}
+  \begin{itemize}
+    \item We the steady state conditional on the interest rate $r$:
+  \end{itemize}
+
+  \begin{minted}{c++}
+steady_state_model;
+    Z=0;
+    pi=(r+1)*beta;
+    C=sqrt((1+1/theta*((1-beta)*(pi-1)*pi-(tau-1/(theta-1))*(1-theta)))/
+        (chi*(1+phi/2*(pi-1)^2)));
+    h=C*(1+phi/2*(pi-1)^2);
+    y_nat=sqrt((theta-1)/theta*(1+tau)/chi);
+    y_gap=log(C)-log(y_nat);
+end;
+
+shocks;
+    var epsilon = 0.01^2;
+end;
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Dynare code (continued)}
+  Finally, we set the initial value and the planner objective:
+  \begin{minted}{c++}
+initval;
+    r=1/beta-1;
+end;
+planner_objective log(C)-chi/2*h^2;
+
+ramsey_model(instruments=(r),planner_discount=beta); 
+
+//conduct stochastic simulations of the Ramsey problem
+stoch_simul(order=2,irf=20,periods=0,irf_plot_threshold=0)
+     LOG_pi LOG_h r LOG_C Z;
+evaluate_planner_objective;     
+\end{minted}
+\end{frame}
+
+
+\section{Discretionary policy}
+
+\subsection{Theory}
+
+\begin{frame}{Discretionary policy equilibrium}
+  \begin{itemize}
+    \item Planner re-optimizes each period and is expected to do so\\
+          $\rightarrow$ no commitment!
+    \item Denote with $y_t$ the endogenous variables and with $u_t$ the policy instruments
+    \item Solution is only well-known for quadratic loss function
+          \begin{align}
+            L_0 = \sum_{t=0}^\infty \beta^{t}(y_t'Wy_t + u_t'Qu_t)
+          \end{align}
+          with linear constraints:
+          \begin{equation}
+            A_0 y_t = A_1y_{t-1} + A_2\mathbb{E}_t y_{t+1} + A_3
+            u_t + A_4 \mathbb{E}_t u_{t+1} + A_5 \varepsilon_t \: ,
+          \end{equation}
+          where $\varepsilon_t$ are the structural shocks and $W,Q,A_i$ are coefficient matrices
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Solution structure}
+  \begin{itemize}
+    \item We are looking for a Markov-perfect Stackelberg-Nash equilibrium:
+          \begin{itemize}
+            \item Stackelberg leader: today's planner
+            \item Stackelberg followers: private sector agents and tomorrow's planner
+          \end{itemize}
+    \item We conjecture our solution will be linear:
+          \begin{align}
+            y_t & = H_1 y_{t-1} + H_2 \varepsilon_t \\
+            u_t & = F_1 y_{t-1} + F_2 \varepsilon_t \: ,
+          \end{align}
+          where $H_1,\;H_2,\;F_1,\;F_2$ are unknown matrices to be determined
+    \item Plugging the guess into the constraints allows deriving a matrix equation whose fixed point corresponds to the solution
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\textcite{Dennis2007} Solution algorithm}
+  {\scriptsize
+    \begin{description}
+      \item[Step 1] For $i=0$, initialize $H_1^{(i)}$, $H_2^{(i)}$, $F_1^{(i)}$,
+            $F_2^{(i)}$
+      \item[Step 2] Compute $D^{(i)} = A_0 - A_2 H_1^{(i)} - A_4 F_1^{(i)}$
+      \item[Step 3] Solve the so-called Sylvester equation
+            \begin{equation}
+              P^{(i)} = W + \beta {F_1^{(i)}}'Q F_1^{(i)} + \beta H_1^{(i)} P^{(i)} H_1^{(i)}
+            \end{equation}
+      \item[Step 4] Set
+            \begin{align*}
+              F_1^{(i+1)} & =  -(Q+A_3'(                                            %{D^{(i)}}')^{-1}P^{(i)}
+              {D^{(i)}}^{-1}A_3)^{-1}A_3'({D^{(i)}}')^{-1}P^{(i)}{D^{(i)}}^{-1}A_1, \\
+              F_2^{(i+1)} & =   -(Q+A_3'({D^{(i)}}')^{-1}P^{(i)}
+              {D^{(i)}}^{-1}A_3)^{-1}A_3'({D^{(i)}}')^{-1}P^{(i)}{D^{(i)}}^{-1}A_5, \\
+              H^{(i+1)}_1 & = {D^{(i)}}^{-1}(A_1+A_3F_1^{(i+1)}),                   \\
+              H^{(i+1)}_2 & = {D^{(i)}}^{-1}(A_5+A_3F_2^{(i+1)}).                   \\
+            \end{align*}
+      \item[Step 5] Go back to Step 2, until convergence.
+    \end{description}
+  }
+\end{frame}
+
+\subsection{Practice}
+
+\begin{frame}{In Dynare}
+  \begin{witemize}
+    \item Quadratic loss function must be provided to Dynare in \texttt{planner\_objective}
+    \item Careful: no linear terms are allowed in the loss function and the variables in the loss function must be mean 0 
+    \item Instrument name and full steady state must be provided (not a conditional one)
+    \item \texttt{discretionary\_policy} to compute discretionary policy, generate IRFs, etc\\
+    $\rightarrow$ similar to \texttt{ramsey\_model} followed by \texttt{stoch\_simul}
+  \end{witemize}
+\end{frame}
+
+\begin{frame}[fragile]{Dynare code}{\texttt{Ramsey\_Example\_discretionary.mod}}
+  \begin{itemize}
+    \item We need to use a quadratic loss function derived from the nonlinear planner objective:
+  \end{itemize}
+\small
+\begin{minted}{c++}
+ steady_state_model;
+    r=1/beta-1;
+    Z=0;
+    pi=(r+1)*beta;
+    C=sqrt((1+1/theta*((1-beta)*(pi-1)*pi-(tau-1/(theta-1))*(1-theta)))/
+    (chi*(1+phi/2*(pi-1)^2)));
+    h=C*(1+phi/2*(pi-1)^2);
+    y_nat=sqrt((theta-1)/theta*(1+tau)/chi);
+    y_gap=log(C)-log(y_nat);
+end;
+
+planner_objective pi_hat^2*theta/((theta-1)/phi) + y_gap^2;
+
+discretionary_policy(instruments=(r),planner_discount=beta); 
+\end{minted}
+\end{frame}
+
+\section{Optimal simple rules}
+
+\subsection{Theory}
+
+\begin{frame}{Program}
+  \begin{itemize}
+    \item The general OSR problem involves the planner picking the optimal parameters $\gamma$ of a policy rule
+          \begin{equation}
+            u_t = g(y_{t+1},y_{t},y_{t-1},\varepsilon_t, \gamma) \: ,
+          \end{equation}
+          where $u_t$ are the policy instruments
+          to maximize the objective function
+          \begin{equation}
+            \max_{\gamma} \mathbb{E}_0 \sum_{t=0}^\infty\beta^{t}U(y_t) 
+          \end{equation}
+    \item Optimization is conducted subject to the private sector equilibrium conditions:
+          \begin{equation}
+            \mathbb{E}_{t}f(y_{t+1}, y_{t}, y_{t-1}, \varepsilon_{t})=0,~\forall \:  t \geq 0 \: ,
+          \end{equation}
+          taking $y_{-1}$ as given and imposing suitable transversality conditions
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Program}
+  \begin{witemize}
+    \item Up to Dynare 6, only special linear-quadratic (LQ) versions of the problem could be solved:
+          \begin{align}
+                         & \min_\gamma \mathbb{E} \left[ y_t'W y_t \right]                        \\
+            \text{s.t.}~ & A_1 \mathbb{E}_t y_{t+1} + A_2 y_t + A_3 y_{t-1} + A_4 \varepsilon_t = 0 \: ,
+          \end{align}
+          where $A_i$ are coefficient matrices obtained from using first-order perturbation
+    \item $W_t$ is the weighting matrix penalizing variances and covariances of the variables\\
+          $\rightarrow$ specified in Dynare using the \texttt{optim\_weights} block\\
+    \item Loss function cannot be automatically derived from \texttt{planner\_objective}
+    \item Disadvantage: LQ setup restricted to first-order approximation, which is often insufficient for proper welfare evaluation (and comparisons to Ramsey)
+    \item Advantage: LQ setup makes e.g. using analytical derivatives possible\\ (\texttt{analytical\_derivation}-option)
+  \end{witemize}
+\end{frame}
+
+
+\begin{frame}{Legacy implementation in Dynare}
+  \begin{witemize}
+    \item \texttt{osr\_params} block specifies parameters $\gamma$ to optimize over
+    \item \texttt{optim\_weights} block specifies weighting matrix $W$
+    \item \texttt{osr\_param\_bounds} block sets bounds for parameter optimization
+    \item  \texttt{osr} command computes solution and results (analogously to \texttt{stoch\_simul})
+    \item  output and metadata located in fields \texttt{M\_.osr} and \texttt{oo\_.osr}
+  \end{witemize}
+\end{frame}
+
+
+\begin{frame}{New implementation in Dynare 7}
+  \begin{witemize}
+    \item Starting with Dynare 7 (and already available in the unstable version), a new implementation of the OSR algorithm is available
+    \item Instead of \texttt{optim\_weights} block a \texttt{planner\_objective} command can be specified
+    \item  \texttt{osr} command computes solution at \texttt{order}$\geq 1$
+    \item \texttt{evaluate\_planner\_objective} command computes welfare at the solution
+  \end{witemize}
+\end{frame}
+
+
+
+\subsection{Practice}
+
+\begin{frame}[fragile]{Dynare code}{\texttt{Ramsey\_Example\_OSR.mod}}
+  \begin{itemize}
+    \item Need to include the Taylor rule whose coefficient we optimize:
+    \begin{equation}
+      r-\bar r =\alpha (\pi-\pi^*)
+    \end{equation}
+  \end{itemize}\vspace{-0.5cm}
+  \small
+  \begin{minted}{c++}
+  model;
+      [name='Euler equation']
+      1/(1+r)=beta*C/(C(+1)*pi(+1));
+      [name='Firm FOC']
+      (tau-1/(theta-1))*(1-theta)+theta*(chi*h*C/(exp(Z))-1)
+      =phi*(pi-1)*pi-beta*phi*(pi(+1)-1)*pi(+1);
+      [name='Resource constraint']
+      C*(1+phi/2*(pi-1)^2)=exp(Z)*h;
+      [name='TFP process']
+      Z=rho*Z(-1)+epsilon;
+      [name='Taylor rule']
+      r=pi_star/beta-1+alpha*(pi-pi_star);
+  end;
+\end{minted}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Dynare code}{\texttt{Ramsey\_Example\_OSR.mod}}
+  \begin{minted}{c++}
+planner_objective log(C)-chi/2*h^2;
+
+//define OSR parameters to be optimized
+osr_params alpha;
+//starting value for OSR parameter
+alpha = 1.5;
+//define bounds for OSR during optimization
+osr_params_bounds;
+    alpha, 0, 100;
+end;
+//compute OSR and provide output
+osr(opt_algo=9,order=2,planner_discount=beta,irf_plot_threshold=0) 
+  LOG_pi LOG_h r LOG_C Z;
+evaluate_planner_objective;
+\end{minted}
+\end{frame}
+
+% \section{Conclusion}
+
+% \begin{frame}{Conclusion}
+%   \begin{itemize}
+%     \item Manual
+%     \item \texttt{tests} subfolder: see subfolders
+%           \begin{itemize}
+%             \item \texttt{optimal\_policy}
+%             \item \texttt{discretionary\_policy}
+%           \end{itemize}
+%           for examples
+%     \item Pruning for Ramsey optimal policy is on the stack
+%   \end{itemize}
+% \end{frame}
+
+
+\begin{frame}[plain,allowframebreaks]{References}
+  \printbibliography
+\end{frame}
+
+\end{document}

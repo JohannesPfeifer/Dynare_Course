@@ -1,0 +1,83 @@
+% LTeX: language=en-US
+\section{IRFs}
+\begin{frame}{The problem with IRFs}
+\begin{witemize}
+\item With a non-linear solution, traditional IRFs do not work anymore
+\item The IRFs depend on two things:
+\begin{enumerate}
+  \item the sequence of future shocks, $u_t$ and
+  \item the point in the state space at which the IRFs are started, i.e.\ the past history of shocks, $\Omega _t$.
+\end{enumerate}
+\item \textcite{KoopPesaranPotter1996} suggested the concept of Generalized IRFs (GIRF) that e.g.\ allow considering ``representative'' IRFs at the ergodic mean
+\item The GIRF at time $t+n$ after a shock $u_t$ is given by
+ \begin{equation}
+ GIRF_n\left( {{u_t},{\Omega _{t - 1}}} \right) = E\left[ {{Y_{t + n}}|{u _t},{\Omega _{t - 1}}} \right] - E\left[ {{Y_{t + n}}|{\Omega _{t - 1}}} \right] \: , \label{eq:girf}
+ \end{equation}
+ (or some variation of this)
+\item Given a point in the state space, the future shock realizations are averaged out
+\end{witemize}
+\end{frame}
+
+\begin{frame}{How to generate GIRFs?}
+\begin{witemize}
+\item Additional problem: without pruning, IRF simulations can explode but with pruning one needs initial conditions not just for economic states, but for the whole augmented state space
+\item There are infinitely many combinations of first to $n$th order terms that could have led to a particular value of the economic states
+\item There are two special points one can consider:
+\begin{enumerate}
+  \item The ergodic mean where all components are at their expected values. i.e.\ the fixed point of the stochastic pruned solution
+  \item The stochastic steady state, i.e.\ the fixed point of the deterministic pruned solution
+\end{enumerate}
+
+\end{witemize}
+\end{frame}
+
+\begin{frame}{How to generate GIRFs?}
+\begin{witemize}
+\item \textcite{AndreasenEtal2018} provide an analytical way to generate GIRFs from the pruned third order state space, starting at the ergodic mean
+\item Dynare uses simulation-based approach to achieve the same result
+\item The GIRFs can be computed from the difference between two simulated series:
+\begin{enumerate}
+  \item a simulated series of 140 periods using random shocks where at time $t=100$ an additional 1 standard deviation shock is added to whatever shock $\varepsilon_{100}$ was already drawn
+  \item a simulated series of 140 periods using the same random shocks, but without the additional 1 standard deviation shock at time $t=100$
+\end{enumerate}
+\item By repeating this several times and taking the average, the effect of the random shocks is averaged out ($\approx$ Monte Carlo Integration)
+\item For volatility shocks, a lot of repetitions may be necessary
+\end{witemize}
+\end{frame}
+
+\begin{frame}{\textcite{FVetal2011AER} IRFs}
+\begin{witemize}
+\item \textcite{FVetal2011AER} do not compute GIRFs in the classical sense
+\item They also condition on future shocks by setting them to 0 and starting the IRFs at the \highlight{ergodic mean in the absence of shocks/stochastic steady state}
+\item Denote the future realization of shocks with $\Omega^{fut}$. The definition used is
+ \begin{align}
+  IR{F_n}\left( {{\nu _t},{\Omega _t}} \right) &= E\left[ {{Y_{t + n}}|{u_t},{\Omega _{t - 1}} = \left\{ { \ldots ,0} \right\},\Omega _{t + 1}^{fut} = \left\{ {0, \ldots } \right\}} \right] \notag \\
+   &- E\left[ {{Y_{t + n}}|0,{\Omega _{t - 1}} = \left\{ { \ldots ,0} \right\},\Omega _{t + 1}^{fut} = \left\{ {0, \ldots } \right\}} \right]  \label{eq:FV_IRF} \: ,
+\end{align}
+where the expected values can be dropped as everything is deterministic
+\item[$\rightarrow$] no repetitions necessary
+\end{witemize}
+\end{frame}
+
+%\begin{frame}{The Problem With FV(2011) IRFs}
+%\begin{itemize}
+%\item Conditioning on future shocks and setting them to 0 only allows capturing part of the economic effects of risk shocks
+%\item Because $\hat x_0^{f}=0$ and all higher order terms are based on this, the effect of the initial condition $ x - \bar x $ will mostly be neglected
+%\item $\hat x_0^{f}=0$ follows from a first order policy function, which is known not to react to risk shocks
+%\item Together with the conditioning on all shocks being 0 $\forall \: t+i, \: i>0$ this implies that only the ``risk adjustment channel'' is present via:
+%\begin{itemize}
+%  \item the constant term $1/2 \times g_{\sigma \sigma }\times \sigma ^2$
+%  \item the time-varying risk-adjustment $1/2\times g_{u\sigma \sigma }\times  \sigma ^2 \times u_t$ in period $t$ where $u_t\neq0$ is present
+%\end{itemize}
+%\item \highlight{amplification effects} introduced by (risk) shocks and embedded in the other higher order terms are totally absent
+%\item[$\rightarrow$] difference in the interaction between the location in the state space and future shocks is not captured
+%\end{itemize}
+%\end{frame}
+
+%\begin{frame}{Dynare Output for Our RBC Model: SVD}
+%\begin{figure}
+%  \includegraphics[scale=.45]{../Codes/Identification/myRBCmodel_first_diff_identification/identification/myRBCmodel_first_diff_identification_ident_pattern_prior_mean_1}
+%\end{figure}
+%\end{frame}
+
+\renewcommand{\Source}{}

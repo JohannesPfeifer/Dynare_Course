@@ -1,0 +1,37 @@
+\documentclass[handout,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[beamer,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[trans,notes=show,usepdftitle=false,aspectratio=169]{beamer}
+
+\input{../Preamble/preamble.tex}
+
+\newcommand{\AllSample}{ \mathcal Y^T }
+
+
+\AtBeginSection[]{
+  \begin{frame}[plain]
+  \frametitle{Overview}
+  \tableofcontents[currentsection,hideallsubsections]
+  \end{frame}
+}
+
+\title[]{\textbf{Advanced Dynare\\}
+\medskip{Chapter VI}\\
+\emph{Full information estimation of DSGE models}
+}
+
+\author{Johannes Pfeifer}
+\input{../date_place.txt}
+
+
+\begin{document}
+
+\maketitle
+
+\include{Bayesian}
+
+\part{References}
+%%
+\begin{frame}[allowframebreaks]{Bibliography}
+\printbibliography
+\end{frame}
+\end{document}

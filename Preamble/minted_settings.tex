@@ -1,0 +1,7 @@
+\usepackage{tcolorbox}
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{minted}{\begin{tcolorbox}[boxsep=0mm]}%
+\AfterEndEnvironment{minted}{\end{tcolorbox}}%
+
+\AtBeginEnvironment{minted}{%
+  \renewcommand{\fcolorbox}[4][]{#4}} 

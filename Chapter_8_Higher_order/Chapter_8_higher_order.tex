@@ -1,0 +1,46 @@
+% LTeX: language=en-US
+\documentclass[handout,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[beamer,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[trans,notes=show,usepdftitle=false,aspectratio=169]{beamer}
+
+\input{../Preamble/preamble.tex}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+
+\begin{document}
+
+%\inserttotalframenumber
+
+
+\title[]{\textbf{Advanced Dynare\\}
+\medskip{Chapter VIII}\\
+\emph{Higher-Order Perturbation}
+}
+
+\author{Johannes Pfeifer}
+\input{../date_place.txt}
+
+\maketitle
+%\include{Intro}
+\begin{frame}
+\frametitle{Outline}
+    \tableofcontents%[onlyparts]
+\end{frame}
+
+\include{Jermann1998}
+\include{higherorder}
+\include{IRF}
+
+\part{References}
+
+\begin{frame}[allowframebreaks]{Bibliography}
+\printbibliography
+\end{frame}
+\end{document}

@@ -1,0 +1,1063 @@
+% LTeX: language=en-US
+
+\begin{frame}{Review}
+\begin{witemize}
+\item Log-Linearized DSGE model solution takes state-state space form\vspace{0.2cm}
+\item Typically, not all state variables are observed\vspace{0.2cm}
+\item Solution: use Kalman Filter to deal with unobserved states and construct likelihood\vspace{0.2cm}
+\item Result: likelihood $\mathcal{L}(y^T|\theta)$, where $\theta$ is the vector of deep parameters and $y^T$ is the complete history of observables \vspace{0.2cm}
+\item Estimating meant finding the parameters $\theta$ that maximized $\mathcal{L}(y^T|\theta)$
+\end{witemize}
+
+\end{frame}
+
+
+\section[The Problem]{The problem addressed by Bayesian estimation}
+%\renewcommand{\Source}{Maddison Data Set}
+
+\begin{frame}{The likelihood}
+\begin{columns}<.->[T] % align columns
+\begin{column}<.->{0.4\textwidth}
+\begin{witemize}
+\item The likelihood is a high-dimensional object\medskip
+\item Even for simple models, it can be ill-behaved, showing hardly any curvature and exhibiting many local maxima
+\end{witemize}
+\end{column}%
+\hfill% 
+\begin{column}<1->{0.6\textwidth}
+\begin{figure}
+  \includegraphics[scale=.45]{Figures/likelihood_surf}
+\end{figure}
+
+\end{column}%
+\end{columns}
+
+\end{frame}
+
+\begin{frame}{The likelihood}
+\begin{columns}<.->[T] % align columns
+\begin{column}<.->{0.4\textwidth}
+\begin{witemize}
+\item For more complicated models, you can think of it as an egg-crate\medskip
+\item ``Dilemma of absurd parameter estimates'' \parencite{AnSchorfheide2007}: ML estimates often at odds with information from outside the model
+\end{witemize}
+\end{column}%
+\hfill%
+\begin{column}<1->{0.6\textwidth}
+\begin{figure}
+   \includegraphics[scale=.1]{Figures/egg_crate}
+\end{figure}
+
+\end{column}%
+\end{columns}
+
+
+\end{frame}
+
+
+\renewcommand{\Source}{\textcite{Koop2003}, Ch. 1}
+\begin{frame}{Bayesian vs.\ frequentist philosophy}
+\begin{witemize}
+    \item In principle, there is a fundamental philosophical difference between Bayesian and frequentist econometrics
+%    \item For example, frequentists, the data are treated as random variables and the parameters as fixed, for Bayesians, the data are fixed and the parameters are random variables
+%    \item Moreover, Bayesians incorporate ``subjective'' prior information, while frequentists claim ``objectivity'' (although model choice, data selection etc. also involve subjective choices)
+    \item Most macroeconomists are not Bayesian believers but pragmatists - up to the point that Bayesian and frequentist techniques are used in the same papers
+    \item Adopting Bayesian techniques makes our lives easier
+    \item Historically, Bayesian were the minority because computing power was not sufficient to apply their methods
+    \item There are very good reasons to be Bayesian \parencite[see e.g.][]{BergerWolpert1988,Sims2007}
+\end{witemize}
+\end{frame}
+
+\renewcommand{\Source}{\textcite{ZyphurOswald2013}}
+\begin{frame}{Bayesian vs.\ frequentist philosophy: concept of probability}
+\begin{witemize}
+    \item Bayesian probability is usually associated with \highlight{degrees of belief or degrees of knowledge}
+    \item Frequentist probability is usually based on \highlight{features of hypothetically observable systems}\\
+    $\rightarrow$ relative frequency of an event ``in the long run''
+    \item Example: ``There is a .50 probability that a fair coin will land heads.''\\
+    \begin{itemize}
+      \item Bayesian: belief evenly divided between the coin landing heads or tails
+      \item Frequentist: result if coin were flipped a hypothetical infinite number of times
+    \end{itemize}
+    \item Frequentist analysis limited to inference about relative frequency of events in the long run
+    \item But: long run unobservable and not in researchers' actual interest
+    \item Bayesians can apply probability to anything that can be the subject of belief or knowledge (hypotheses, statistical parameters, entire statistical models)
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Bayesian vs.\ frequentist philosophy: conditioning sets}
+\begin{witemize}
+    \item Frequentists estimate sampling distribution for estimated effect/parameter
+    \begin{itemize}
+      \item distribution simulates observed effect if repeated infinite number of times, with only sampling error affecting results
+      \item data carry uncertainty via sampling distribution, while parameter has fixed ``true'' population value\\
+      $\rightarrow$ \highlight{conditioning on parameter} $P(Y|\theta)$
+      \item Null Hypothesis Significance Testing (NHST) involves testing a hypothesis we do not believe in
+      \item $p$-value gives probability of effect, assuming Null is true\\
+      $\rightarrow$ relies on hypothetically repeating experiment that never occurred
+    \end{itemize}
+    \item Bayesians make direct probabilistic statements about effect/parameter, based on observed data
+    \begin{itemize}
+      \item Parameter is treated as random/uncertain while data is taken as fixed\\
+      $\rightarrow$ \highlight{conditioning on data} $P(\theta|Y)$
+    \end{itemize}
+\end{witemize}
+\end{frame}
+
+\renewcommand{\Source}{\textcite{Koop2003}, Ch. 1}
+\begin{frame}{The posterior density}
+\begin{witemize}
+    \item Central object: \highlight{posterior probability/posterior density}
+    \begin{equation}
+      P(\theta|Y)
+    \end{equation}
+    of a parameter $\theta$, conditional on having seen the data $Y$
+    \item Posterior is fully-fledged density function!
+    \item Allows statements like: the regression indicates that with 90\% probability the fiscal multiplier is between 0.3 and 1.5
+    \item NHST does not allow such statements!
+    \item Rejecting the Null does not tell us anything about likely effect\\
+    $\rightarrow$ only know the data is unlikely to come from a world where the Null is true\\
+    $\rightarrow$ estimated value is then preferred
+    \item Problem: how to obtain this posterior?
+\end{witemize}
+\end{frame}
+
+\begin{frame}{The central element: Bayes' Rule}
+\begin{witemize}
+    \item Consider the basic laws of probability for two events $A$ and $B$:
+    \begin{align}
+        p\left( {A,B} \right) &= p\left( {A|B} \right)p\left( B \right) \\
+        p\left( {A,B} \right) &= p\left( {B|A} \right)p\left( A \right)
+    \end{align}
+    where $p\left( {A,B} \right)$ is the joint probability, $p\left( {A|B} \right)$ is the conditional probability, and $p\left( B \right)$ the marginal probability
+    \item Equating them results in \highlight{Bayes' Rule}
+    \begin{equation}
+    p\left( {B|A} \right) = \frac{{p\left( {A|B} \right)p\left( B \right)}}{{p\left( A \right)}}
+    \end{equation}
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}{Bayes' Rule applied}
+\begin{witemize}
+    \item Now apply this to a case where we want to use some data $y^T$ to infer a parameter vector $\theta$
+        \begin{equation}
+            p\left( {\theta |{y^T}} \right) = \frac{\mathcal{L}\left( {{y^T}|\theta } \right)p\left( \theta  \right)}{p\left( y^T \right)} \propto \mathcal{L}\left( {{y^T}|\theta } \right)p\left( \theta  \right) \label{eq:Bayes}
+        \end{equation}
+    \item $p\left( {\theta |{y^T}} \right)$ is called the \highlight{posterior distribution}; it incorporates all we know about the parameters and incorporates data and non-data information
+    \item $p\left( \theta \right)$ is the \highlight{prior distribution}; it is independent of the data and incorporates all non-data information on the parameters
+    \item $p\left( y^T \right)$ is the \highlight{data density}; as it is independent of the parameters, it can be treated as a proportionality constant (except when doing model comparison)
+    \item Equation \eqref{eq:Bayes} says that the \highlight{posterior is proportional to likelihood times prior}
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}{The problem with Bayesian estimation}
+\begin{itemize}
+    \item Historically, Bayesians were the minority due to insufficient computing power. Why?
+    \item
+        \begin{equation}
+            p\left( {\theta |{y^T}} \right) = \frac{\mathcal{L}\left( {{y^T}|\theta } \right)p\left( \theta  \right)}{p\left( y^T \right)} \propto \mathcal{L}\left( {{y^T}|\theta } \right)p\left( \theta  \right) \tag{\ref{eq:Bayes}}
+        \end{equation}
+        describes a \highlight{full distribution} that often is not analytically tractable
+    \item Characterizing the posterior distribution by its mean and variance. We need to compute:
+    \begin{equation}
+    \mathbb{E}\left( {\theta |{y^T}} \right) = \int {\theta p\left( {\theta |{y^T}} \right)d\theta }
+    \end{equation}
+    and
+    \begin{align}
+      \operatorname{var} \left( {\theta |{y^T}} \right) &= \mathbb{E}\left( {{\theta ^2}|{y^T}} \right) - {\left[ {\mathbb{E}\left( {\theta |{y^T}} \right)} \right]^2} \notag \\
+       &= \int {{\theta ^2}p\left( {\theta |{y^T}} \right)d\theta }  - {\left[ {\mathbb{E}\left( {\theta |{y^T}} \right)} \right]^2}
+    \end{align}
+    \item We need to evaluate integrals that usually cannot be worked out analytically!
+    \end{itemize}
+\end{frame}
+
+\section[Posterior]{Characterizing the posterior}
+\begin{frame}{Getting the mean}
+\begin{witemize}
+    \item Ingenious idea: we are typically interested in integrals of the form
+    \begin{equation}
+    \mathbb{E}\left( {g\left( \theta  \right)|{y^T}} \right) = \int {g\left( \theta  \right)p\left( {\theta |{y^T}} \right)d\theta }
+    \end{equation}
+    \item If we had \highlight{iid draws from the posterior}, we could simply use a law of large numbers:
+    \begin{equation}
+    \mathbb{E}\left( {g\left( \theta  \right)|{y^T}} \right) = \int {g\left( \theta  \right)p\left( {\theta |{y^T}} \right)d\theta }  \approx \frac{1}{S}\sum\limits_{s = 1}^S {g\left( {{\theta _s}} \right)} =\hat g_S
+    \end{equation}
+    \item Replace integral by sum over $S$ draws from the posterior distribution $p(\theta|y^T)$
+    \item This is called \highlight{Monte Carlo Integration}
+    \end{witemize}
+\end{frame}
+
+\begin{frame}{Numerical standard error}
+\begin{itemize}
+    \item How good is this estimate?
+    \item Central limit theorem ensures that
+        \begin{equation}
+        \sqrt S \left( {{{\hat g}_S} - \mathbb{E}\left( {g\left( \theta  \right)|{y^T}} \right)} \right) \to N\left( {0,\sigma _g^2} \right)
+        \end{equation}
+    \item Hence,
+    \begin{equation}
+    \mathbb{E}\left( {g\left( \theta  \right)|{y^T}} \right) \sim N\left( {{{\hat g}_S},\frac{{\sigma _g^2}}{S}} \right)
+    \end{equation}
+    \item The standard deviation
+        \begin{equation}
+        \sigma _g^2=\operatorname{var}(g(\theta)|y^T)
+        \end{equation}
+        can be estimated by the variance in our Monte Carlo sample
+    \item The \highlight{Numerical Standard Error (NSE)}
+    \begin{equation}
+    \frac{{\sigma _g}}{\sqrt S}
+    \end{equation}
+    is a measure of approximation error.
+\end{itemize}
+\end{frame}
+
+\renewcommand{\Source}{\textcite{Koop2003}, p. 44}
+\begin{frame}{Some more jargon}
+\begin{itemize}
+    \item Even if you are not a Bayesian believer, you should be familiar with the different terminology
+    \item Denote with $\omega=g(\theta)$ some vector of functions of the parameters $\theta$, defined over some region $\Omega$
+\end{itemize}
+      \begin{Definition}[Credible Set]
+      The set $C\subseteq \Omega$ is a $100(1-\alpha)\%$ \highlight{credible set} with respect to $p(\omega|y)$ if
+      \vspace{-.3cm}
+      \begin{equation}
+      p(\omega \in C|y)=\int_C p(\omega|y)d\omega=1-\alpha
+      \end{equation}
+    \end{Definition}
+\begin{itemize}
+    \item We are typically interested in the smallest one, the ``Bayesian equivalent to a confidence interval''
+\end{itemize}
+      \begin{Definition}[Highest Posterior Density Interval]
+      A $100(1-\alpha)\%$ \highlight{highest posterior density interval} for $\omega$ is a $100(1-\alpha)\%$ \highlight{credible interval} that has a smaller support than any other $100(1-\alpha)\%$ credible interval for $\omega$
+    \end{Definition}
+\end{frame}
+
+%\renewcommand{\Source}{\textcite{Sims2007}/\textcite{BergerWolpert1988}}
+%\begin{frame}{Credible Set vs. Confidence Intervals}
+%\begin{itemize}
+%    \item Bayesian credible sets are \highlight{post-experimental}: conditional upon observing the data, a $(1-\alpha)\%$ credible set contains the true parameter, which is a random variable, with $(1-\alpha)\%$ probability
+%    \item Frequentist confidence intervals are based on the long-run performance if an experiment is repeatedly performed
+%    \item They are thus inherently \highlight{pre-experimental} and treat the parameter as non-random
+%    \item CIs are constructed so that the true parameter will be contained in $(1-\alpha)\%$ of the CI constructed from the data
+%    \item Moreover, a $(1-\alpha)\%$ CI contains the true parameter value with probability $(1-\alpha)\%$ only before one has seen the data
+%    \item After the data has been seen, the probability is zero or one
+%    \item CIs do not help in putting constraints on a parameter after data is observed
+%    \item One can only say: the true parameter is either in the CI or not
+%    \item Thus, both answer fundamentally different questions
+%\end{itemize}
+%\end{frame}
+%
+%\begin{frame}{Credible Set vs. Confidence Intervals: Example}
+%\begin{itemize}
+%    \item We want to infer a parameter $\theta$ and observe two independent random variables $X_1$ and $X_2$ with
+%      \[
+%      P(X_i=\theta-1)=P(X_i=\theta+1)=0.5 \: , i \in 1,2
+%      \]
+%      \item The smallest 75\% CI is
+%      \[
+% C\left( {{X_1},{X_2}} \right) = \left\{ {\begin{array}{*{20}{c}}
+%  {\frac{1}{2}\left( {{X_1} + {X_2}} \right)\: \text{if} \: {X_1} \ne {X_2}} \\
+%  {X_1} - 1 \: \text{if} \: {X_1} = {X_2}
+%\end{array}} \right.
+%\]
+%    \item When repeatedly sampling, the true $\theta$ will be in this interval in $75\%$ of the cases, because
+%    \begin{itemize}
+%        \item if ${x_1} \ne {x_2}$ (half of the cases), we know for sure that $\theta=0.5(x_1+x_2)$\\
+%        $\Rightarrow$ correct in $100\%$ of these cases
+%        \item if ${x_1} = {x_2}$ (half of the cases), either $\theta=x_1+1$ or $\theta=x_1-1$\\
+%        $\Rightarrow$ correct in $50\%$ of these cases
+%    \end{itemize}
+%\item Bayesians, upon observing the data, are $100\%$ sure about $\theta$ or $50\%$
+%\item Does it make sense to report pre-experimental measure when it is known to be misleading after seeing the data?
+%\end{itemize}
+%\end{frame}
+
+\renewcommand{\Source}{}
+\begin{frame}{Problems everywhere: posterior sampling}
+\begin{witemize}
+    \item Monte Carlo Integration sounds nice and easy, but there's a problem: how to get draws from an intractable distribution?
+    \item This is the big topic of \highlight{posterior sampling algorithms}
+    \item The most important ones are
+    \begin{itemize}
+      \item Importance Sampling
+      \item Gibbs-Sampling \parencite{GemanGeman1984}
+      \item Metropolis-Hastings algorithm \parencite{Metropolis1953,Hastings1970}
+    \end{itemize}
+    \item We will only consider the last one
+    \item Gibbs-Sampler is a special case of the Metropolis-Hasting algorithm \parencite[see][]{Gelman1992}
+    \item Gibbs sampling and the Metropolis-Hastings algorithm give rise to \highlight{correlated random draws from the posterior} and belong to the class of \highlight{Monte Carlo Markov Chain} algorithms
+\end{witemize}
+\end{frame}
+
+\section[Prior]{Prior distributions}
+
+\begin{frame}{Where do priors come from?}
+\begin{figure}
+  \includegraphics[trim=0 370 0 0,clip,width=6 cm]{Figures/SMBC_1759360612-20251002_priors.png}
+  \includegraphics[trim=0 0 0 770,clip,width=6 cm]{Figures/SMBC_1759360612-20251002_priors.png}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Prior distributions and subjectivity}
+\begin{witemize}
+\item There is a large discussion about the ``subjectivity'' of priors \parencite[e.g.][]{Berger2006}
+\item We will abstract from the philosophical issues arising here
+\item Necessarily subjective choices like e.g.\ the model used tend to be more important than the prior over parameters
+\item But be aware: issue is contentious as ``subjectivity'' does not square well with the ``scientific method''
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}{First things first: Specifying the prior}
+\begin{witemize}
+\item We need to specify the prior distribution $p(\theta)$
+\item In general, this can be a full multivariate distribution
+\item In practice, people typically use \highlight{independent priors} \parencite[][is a notable exception]{AndrleBenes2013}
+\item Choosing sensible priors is hard, see \textcite{DelNegroetal2008}
+\item What is the purpose of priors?
+\begin{enumerate}
+  \item Incorporating information extraneous to the sample
+  \item Providing additional curvature to the likelihood function and straightening out cliffs
+\end{enumerate}
+\item Parameter range often narrows down prior choice
+\item After choosing the priors, you should do a \highlight{prior predictive}: check what the prior implies for the question you are asking \parencite[see][]{LeeperWalkerTraum2017AER}
+\item This way, you make sure that your estimation results are not solely driven by your prior
+\end{witemize}
+\end{frame}
+
+\renewcommand{\Source}{}
+\begin{frame}{Endogenous priors}
+\begin{witemize}
+\item We are doing \highlight{full information} estimation
+\item We are not matching moments!
+\item Regularly happens that estimated model implies too high variances
+\item Proposed solution: \highlight{endogenous priors} \parencite{ChristianoTrabandtWalentin2011,DelNegroetal2008}
+\item Motivated by sequential Bayesian learning
+\item Starting from independent initial priors, use standard deviations observed in a ``pre-sample'' to update those initial priors.
+\item Product of the initial priors and the pre-sample likelihood of the standard deviations of
+the observables is used as the new prior
+\item Triggered by the \texttt{endogenous\_prior}-option of the Dynare \texttt{estimation}-command
+\end{witemize}
+\end{frame}
+
+\subsection{Normal Distribution}
+\begin{frame}{Normal prior}
+\begin{figure}
+  \includegraphics[scale=.45]{Figures/normal_prior}
+\end{figure}
+\begin{itemize}
+\item Unbounded support $(-\infty,\infty)$ and symmetric
+\item Typically used for e.g.\ feedback parameters where sign is unknown
+\end{itemize}
+\end{frame}
+
+\subsection{Uniform Distribution}
+\begin{frame}{Uniform prior}
+\begin{figure}
+  \includegraphics[scale=.45]{Figures/uniform_prior}
+\end{figure}
+\begin{itemize}
+\item Bounded support on $[LB,UB]$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Uniform prior}
+\begin{itemize}
+\item For a variable $Y \sim U(a,b)$, the PDF is given by
+    \begin{equation}
+    {f_U}\left( {y|a,b} \right) = \left\{ {\begin{array}{*{20}{c}}
+      {\frac{1}{{b - a}} \text{ if } a \leqslant y \leqslant b} \\
+      {0 \text{ otherwise} }
+    \end{array}} \right.
+    \end{equation}
+    where $-\infty<a<b<\infty $
+    \item Moreover,
+    \begin{align}
+  E\left( Y \right) = \frac{a+b}{2} \hfill \\
+  \operatorname{var} \left( Y \right) = \frac{{{{\left( {b - a} \right)}^2}}}{{12}}
+\end{align}
+    \item Prior is ``flat'', i.e.\ all points are equally likely, and it does not introduce curvature
+    \item Often called \highlight{uninformative prior}
+    \item But: it is informative in the sense that you say all parameter values in the interval are equally likely
+    \item Beware: with bounds at infinity, prior is \highlight{improper} (cf. model comparison)
+\end{itemize}
+\end{frame}
+
+
+\subsection{Beta Distribution}
+\begin{frame}{Beta prior}
+\begin{figure}
+  \includegraphics[scale=.45]{Figures/beta_prior}
+\end{figure}
+\begin{itemize}
+\item Bounded support on $[0,1]$
+\item Often used for autoregressive parameters, the discount factor, Calvo parameters, etc.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Beta prior}
+\begin{witemize}
+    \item Suitable transformations allow scaling it to different support like $[-1,1]$
+    \item Relatively flexible in allowing for different shapes, but care is required
+    \item Due to bounded support, a high variance can result in assigning high mass to extremes in the tails
+    \item[$\Rightarrow$] mode, i.e.\ point of highest likelihood, far away from prior mean
+    \item Always plot the prior distribution!
+\end{witemize}
+\end{frame}
+
+
+\subsection{Gamma Distribution}
+\begin{frame}{Gamma prior}
+\begin{figure}
+  \includegraphics[scale=.45]{Figures/gamma_prior}
+\end{figure}
+\begin{itemize}
+\item Support $[0,\infty)$, i.e.\ 0 is included
+\item Typically used for variances and Taylor rule feedback parameters
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Gamma prior}
+\begin{itemize}
+\item For a variable $Y \sim G(\mu,\nu)$, where $\mu$ is the mean and $\nu$ the degrees of freedom, the PDF is given by
+\begin{equation}
+{f_G}\left( {y|\mu,\nu} \right) = \left\{ {\begin{array}{*{20}{c}}
+  {\frac{1}{{{{\left( {\frac{{2\mu }}{\nu }} \right)}^{\frac{\nu }{2}}}\Gamma \left( {\frac{\nu }{2}} \right)}}{y^{\frac{{\nu  - 2}}{2}}}{e^{ - \frac{{y\nu }}{{2\mu }}}} \text{ if }0 \leqslant y \leqslant \infty } \\
+  {0\text{ otherwise} }
+\end{array}} \right. \: ,
+\end{equation}
+    where $\Gamma()$ is the Gamma function
+    \item Moreover,
+    \begin{align}
+  E\left( Y \right) &= \mu  \hfill \\
+  \operatorname{var} \left( Y \right) &= \frac{{2{\mu ^2}}}{\nu }
+\end{align}
+    \item Beware: Matlab uses ${f_G}\left( {y|a,b} \right)$ with $a = \frac{\nu }{2},b = \frac{{2\mu }}{\nu }$
+    \item Thus, use \vspace{-.3cm}
+    \begin{align}
+  a &= \frac{{{\mu ^2}}}{{{\sigma ^2}}} \hfill \\
+  b &= \frac{{{\sigma ^2}}}{\mu }
+    \end{align}
+\end{itemize}
+\end{frame}
+
+\subsection{Inverse Gamma Distribution}
+\renewcommand{\Source}{Wikipedia}
+\begin{frame}{Inverse Gamma prior}
+\begin{figure}
+  \includegraphics[scale=.45]{Figures/inverse_gamma_prior}
+\end{figure}
+\begin{itemize}
+\item Support $(0,\infty)$, i.e.\ 0 is not included
+\item Typically used for variances
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Inverse Gamma prior}
+\begin{itemize}
+    \item If $y$ is Inverse Gamma, then $1/y$ is Gamma distributed
+    \item The pdf is given by
+    \begin{equation}
+    {f_{IG}}\left( {y|a,b} \right) = \left\{ {\begin{array}{*{20}{c}}
+  {\frac{{{b^a}}}{{\Gamma \left( a \right)}}{y^{a - 1}}{e^{ - by}} \text{ if } 0 \leqslant y \leqslant \infty } \\
+  {0 \text{ otherwise} }
+\end{array}} \right.
+\end{equation}
+with
+\begin{align}
+  E\left( Y \right) &= \frac{a}{b} \hfill \\
+  \operatorname{var} \left( Y \right) &= \frac{a}{{{b^2}}}
+\end{align}
+\item Thus:
+    \begin{align}
+  a &= \frac{{{\mu ^2}}}{{{\sigma ^2}}} \hfill \\
+  b &= \frac{\mu }{{{\sigma ^2}}}
+    \end{align}
+    \item Theoretically, a better choice for variances  if you want to prevent \highlight{stochastic singularity}
+    \item But: variance of exactly 0 is a zero probability event
+    \item[$\Rightarrow$] Difference not really important
+\end{itemize}
+\end{frame}
+
+\subsection{Example}
+\renewcommand{\Source}{}
+\begin{frame}{Prior plots}{\texttt{\texttt{RBC\_Bayesian.mod}}}
+\begin{figure}
+  \includegraphics[scale=.65]{Bayesian_Estimation/RBC_Bayesian_Priors1}
+\end{figure}
+\begin{itemize}
+\item Always check whether your prior looks sensible
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mode check plots}{\texttt{\texttt{RBC\_Bayesian.mod}}}
+\begin{figure}
+  \includegraphics[scale=.6]{Bayesian_Estimation/RBC_Bayesian_CheckPlots1}
+\end{figure}
+\begin{itemize}
+\item Notice how the prior affects the posterior for \texttt{rhog}
+\end{itemize}
+\end{frame}
+
+\section[M-H]{The Metropolis-Hastings algorithm}
+
+\begin{frame}{The problem: drawing from the posterior}
+
+\begin{witemize}
+\item We would like to compute
+    \begin{equation}
+    E\left( {g\left( \theta  \right)|{y^T}} \right) = \int {g\left( \theta  \right)p\left( {\theta |{y^T}} \right)d\theta }  \approx \frac{1}{S}\sum\limits_{s = 1}^S {g\left( {{\theta _s}} \right)} =\hat g_S
+    \end{equation}
+\item While we can evaluate $p\left( \theta|{y^T}\right)$, we do not know how to draw from it
+\item Idea: find mechanism that
+\begin{enumerate}
+  \item draws from a stand-in proposal density
+  \item evaluates both proposal density and target density
+  \item reweights the draws based on the comparison of densities to obtain draws from target
+\end{enumerate}
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Metropolis Hastings-algorithm}
+\begin{itemize}
+    \item Start with a vector $\theta_0$
+    \item Repeat for $j=1,\ldots,N$
+    \begin{itemize}
+        \item Generate candidate $\tilde \theta$ from proposal density $q(\theta_{j-1},\tilde \theta)$ and $u$ from $\mathcal{U}(0,1)$
+        \item If $\tilde \theta$ is valid parameter draw (steady state exists, Blanchard-Kahn conditions satisfied etc.) and $u<\alpha(\theta^{j-1},\theta^{j})$ with
+        \begin{equation}
+        \alpha \left( {\theta_{j-1},\tilde \theta} \right) = \left\{ {\begin{array}{*{20}{c}}
+            {\min \left[ {\frac{{p \left( \tilde \theta | y^T\right)q\left( {\tilde \theta,\theta_{j-1}} \right)}}{{p \left(\theta_{j-1} | y^T\right)q\left( {\theta_{j-1},\tilde \theta} \right)}},1} \right] \text{ if }p \left( \theta_{j-1} \right)q\left( {\theta_{j-1},\tilde \theta} \right) > 0} \\
+            {1 \text{ otherwise} }
+            \end{array}} \right.
+        \end{equation}
+        set $\theta_j=\tilde \theta$
+        \item Otherwise, set $\theta_j=\theta_{j-1}$ (implies setting $p(\tilde \theta)=0$ if draw invalid)
+    \end{itemize}
+    \item Return the values $\{\theta_0,\ldots,\theta_N\}$
+    \item After the chain has passed the \highlight{transient stage} and the effect of the starting values has subsided, the subsequent draws can be considered draws from the posterior
+    \item[$\Rightarrow$] \highlight{burn-in} required that assures remaining chain has \highlight{converged}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Intuition}
+\begin{witemize}
+    \item Note: with symmetric density, the scaling probability simplifies to
+    \begin{equation}
+        \alpha \left( {{\theta _{j - 1}},\tilde \theta} \right) = \min \left[ {\frac{{L\left( {\left. {{Y^T}} \right|\tilde \theta} \right)p\left( \tilde \theta \right)}}{{L\left( {\left. {{Y^T}} \right|{\theta _{j - 1}}} \right)p\left( {{\theta _{j - 1}}} \right)}},1} \right]
+    \end{equation}
+    \item Jump always ``uphill'' and ``downhill'' with some probability (cf. Simulated Annealing)
+\end{witemize}
+\end{frame}
+
+\begin{frame}{MH with symmetric proposal: uphill}
+  \bigskip
+  \begin{center}
+  \scalebox{.7}{\input{Figures/mhplot-b.tex}}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}{MH with symmetric proposal: downhill}
+  \bigskip
+  \begin{center}
+  \scalebox{.7}{\input{Figures/mhplot-c.tex}}
+  \end{center}
+\end{frame}
+
+
+\subsection{Choosing a Proposal Density}
+\begin{frame}{The Random-Walk Metropolis Hastings algorithm}
+\begin{witemize}
+    \item As long as the regularity conditions are satisfied, any proposal density $q$ will ultimately lead to convergence to the invariant distribution
+    \item However: speed of convergence may differ significantly
+    \item In practice, people often use the \highlight{Random-Walk Metropolis Hastings} algorithm where
+    \begin{equation}
+    q\left( \theta_{j-1},\tilde \theta \right) = {q_{RW}}\left( \theta_{j-1}-\tilde \theta \right)
+    \end{equation}
+    and $q_{RW}$ is a multivariate density
+    \item The candidate $\tilde \theta$ is thus given by the old value $\theta_{j-1}$ plus a random variable increment
+    \begin{equation}
+    \tilde \theta=\theta_{j-1}+z, z\sim q_{RW}
+    \end{equation}
+ \end{witemize}
+\end{frame}
+
+\begin{frame}{Choosing a proposal density}
+\begin{witemize}
+    \item Often, one uses
+    \begin{equation}
+    q_{RW}=\mathcal{N}(0,c^2\Sigma) \text{ or } q_{RW}=t_\nu(0,c^2\Sigma)
+    \end{equation}
+    \item Thus, one needs a \highlight{scaling matrix} $\Sigma$ and a \highlight{scaling factor} $c$
+    \item Idea: construct Gaussian approximation to posterior and use asymptotic covariance matrix as scaling matrix
+    \item Allows efficient evaluation around mode
+    \item Note: asymptotically, the prior plays no role and the posterior will only depend on the likelihood
+    \item \textcite{Koop2003} only uses likelihood function, while \textcite{AnSchorfheide2007} use posterior; we side with the latter
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Asymptotic normality}
+\begin{witemize}
+    \item Using normal approximation is justified, because with regularity conditions, posterior of $\theta $ will be \highlight{asymptotically normal} \parencite[see e.g.][]{Walker1969,Kim1998,Crowder1998}
+    \item But convergence may be slow
+    \item Normal approximation can often be improved by \highlight{natural re-parametrization} \parencite{Adolfsonetal2007}: bring bounded parameters to unbounded support:
+    \begin{itemize}
+      \item log transformation of positive parameters
+      \item logit-transformation for parameters on unit interval
+    \end{itemize}
+
+\end{witemize}
+\end{frame}
+
+\subsection{The Scaling of the Proposal Density}
+\renewcommand{\Source}{}
+\begin{frame}{Technical considerations: the starting point}
+\begin{witemize}
+    \item Usual procedure: use numerical optimizer to find \highlight{posterior mode} of log-posterior $p(\theta|Y^T)$
+    \item In practical applications, non-derivative based optimizers seem to perform better
+    \item Finding the mode is hard and time-intensive; try (sequence of) different optimizers
+    \item In some sense, finding the mode is not important as long as the regularity conditions are met (positive definite scaling matrix)
+    \item Wherever you start, asymptotically the MCMC sampler will spend most time at the mode and get there
+    \item MCMC is a quite inefficient optimizer (cf. Simulated Annealing)
+    \item Thus: if you only have finite time, try to get as close as possible
+    \item Problems of not having found the mode can often be seen as a slow drift in the parameters and posterior density
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Technical considerations: the scaling matrix I}
+\begin{witemize}
+    \item Set the scaling matrix $\Sigma$ to the \highlight{inverse Hessian} at the posterior mode:
+    \begin{equation}
+    \Sigma=\operatorname{var} \left( {\hat \theta } \right) = I\left( \theta  \right)^{-1} = {\left( { - E\left[ {\frac{{{\partial ^2}\log p\left( {\theta |Y} \right)}}{{\partial \theta \partial \theta '}}} \right]} \right)^{ - 1}}
+    \end{equation}
+    \item \texttt{csminwel/newrat} will provide an estimate of the Hessian as one of its outputs
+    \item In practice, having fatter tails often works better: might want to use $t$-distribution instead of normal
+    \item Sounds easy, but creates a lot of problems!
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Technical considerations: the scaling matrix II}
+\begin{witemize}
+    \item Theoretical Inverse Hessian at the true mode is positive definite, but the numerical one at the conjectured mode often is not
+    \item Literature uses various (dirty) tricks like
+    \begin{witemize}
+      \item use Jordan decomposition to decompose matrix, set the eigenvalues smaller than or equal 0 to some small number, and then recompose the matrix
+      \item use \highlight{generalized Cholesky} \parencite[see e.g.][]{GillKing2004}
+      \item Try different step sizes for numerical evaluation of derivatives \parencite{AnSchorfheide2007}\\
+      $\rightarrow$ $\texttt{analytic\_derivation}$-option can also help
+    \end{witemize}
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Non-positive definite Hessians: what to do?}
+\begin{witemize}
+  \item Theory \parencite[e.g.][]{ChibGreenberg1995}: any positive definite proposal matrix for the jumping distribution should work (only efficiency will suffer)
+  \item Two things one can try:
+  \begin{enumerate}
+    \item \texttt{mode\_compute=6} runs MCMC chain and will use covariance of draws for jumping proposal density\\
+    $\rightarrow$ almost always positive definite, but numerically problematic in case of corner solutions\vspace{0.15cm}
+    \item Use \texttt{mcmc\_jumping\_covariance=option}-option to start estimation with a user-defined covariance matrix:
+        \begin{itemize}
+          \item \texttt{prior\_variance} uses prior variances on the diagonal
+          \item \texttt{identity\_matrix} employs identity matrix
+          \item provide a user-defined matrix in a \texttt{.mat}-file,
+        \end{itemize}
+        where \texttt{mh\_jscale} can be used to scale the matrices
+  \end{enumerate}
+  \item If resulting MCMC run performs well, recompute covariance matrix of the actual draws and use that one for new run
+  \end{witemize}
+\end{frame}
+
+\begin{frame}{Choosing the scaling factor}
+\begin{itemize}
+    \item The scaling factor affects the behavior of the M-H Chain through:
+    \begin{itemize}
+      \item \highlight{Acceptance Rate}: percentage of times a move is made
+      \item Region of the sample space covered by the sampler
+    \end{itemize}
+    \item Consider a case where the sampler has converged and the area around the \highlight{mode} is sampled
+    \item If the scaling is too wide, many implausible parameter vectors far away from the mode will be proposed and rejected (accept. prob. low)
+    \item If the scaling is too small, many likely parameter vectors close to the mode will be proposed and accepted (accept. prob. high)
+    \item Low probability regions will be undersampled $\Rightarrow$ will take the sampler a long time to traverse the support of the density
+    \item In both cases, there tends to be a \highlight{high autocorrelation in the draws}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Choosing the scaling factor: Optimal value}
+\begin{witemize}
+    \item \textcite{Robertsetal1997}: if target and proposal are normal densities,
+    \begin{itemize}
+      \item the optimal acceptance rate is 45\% in the univariate case
+      \item 23\% for infinitely many parameters (and already 25\% for 6 parameters)
+    \end{itemize}
+    \item People usually aim at a value around 25-30 percent
+    \item A good starting point is \texttt{mh\_jscale=2.38/sqrt(n)}, where $n$ is the number of parameters estimated
+    \item \texttt{mh\_tune\_jscale=double} option in Dynare to automatically tune the \texttt{mh\_jscale} parameter to achieve a target
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}{Acceptance rate too low}
+\begin{figure}
+  \includegraphics[scale=.35]{Bayesian_Estimation/RBC_low_acceptance/graphs/TracePlot_SE_eps_z}
+  \includegraphics[scale=.35]{Bayesian_Estimation/RBC_low_acceptance/graphs/MH_Autocorrelation_SE_eps_z}
+  \caption{Trace and Autocorrelation Plot: \texttt{eps\_z}}
+\end{figure}
+\begin{itemize}
+    \item Acceptance Rate of 2.5\%
+    \item Bad mixing and autocorrelation function only decays slowly
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acceptance rate too high}
+\begin{figure}
+  \includegraphics[scale=.35]{Bayesian_Estimation/RBC_high_acceptance/graphs/TracePlot_SE_eps_z}
+  \includegraphics[scale=.35]{Bayesian_Estimation/RBC_high_acceptance/graphs/MH_Autocorrelation_SE_eps_z}
+  \caption{Trace and Autocorrelation Plot: \texttt{eps\_z}}
+\end{figure}
+\begin{itemize}
+    \item Acceptance Rate of 85\%
+    \item Bad mixing and autocorrelation function only decays slowly
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acceptance rate on target}
+\begin{figure}
+  \includegraphics[scale=.30]{Bayesian_Estimation/RBC_medium_acceptance/graphs/TracePlot_SE_eps_z}
+  \includegraphics[scale=.30]{Bayesian_Estimation/RBC_medium_acceptance/graphs/MH_Autocorrelation_SE_eps_z}
+  \caption{Trace and Autocorrelation Plot: \texttt{eps\_z}}
+\end{figure}
+\begin{itemize}
+    \item Acceptance Rate of 21\%
+    \item Good mixing and autocorrelation function decays relatively fast
+\end{itemize}
+\end{frame}
+
+\section[Diagnostics]{Convergence and efficiency}
+
+
+
+\begin{frame}[fragile]{Diagnostics: trace plots}
+\begin{figure}
+  \includegraphics[width=5.2cm]{Figures/trace_plot}\includegraphics[width=5cm]{Figures/TracePlot_omega}
+\end{figure}
+\begin{witemize}
+\item Trace plots available via
+\begin{minted}{c++}
+generate_trace_plots(chain_number)
+\end{minted}
+provide valuable clues to non-convergence\\
+$\rightarrow$ e.g.\ drifts to regions of higher posterior density (left) or multi-modality (right)
+\end{witemize}
+
+\end{frame}
+
+\begin{frame}{Efficiency}
+\begin{witemize}
+    \item Ideally, we want iid draws from the posterior
+    \item MCMC only delivers correlated draws (hence: Markov Chain)
+    \item While high autocorrelation in the draws may signify problems with the scaling, even with the ``optimal'' acceptance rate, there might be high autocorrelation
+ \end{witemize}
+\end{frame}
+
+
+\begin{frame}{More powerful posterior samplers}
+\begin{columns}<.->[T] % align columns
+\begin{column}<.->{0.63\textwidth}
+\begin{witemize}
+    \item What if Markov Chain shows poor behavior: drift, high autocorrelation, poor mixing, large inefficiency factors?
+    \item Try a more powerful \texttt{posterior\_sampling\_method}:
+    \begin{enumerate}
+      \item \texttt{\textquotesingle slice\textquotesingle}: Slice sampler
+      \item \texttt{\textquotesingle tailored\_random\_block\_metropolis\_hastings\textquotesingle}: Tailored Random Block Metropolis Hastings (TaRB) of \textcite{Chib2010}
+      \item \texttt{\textquotesingle dime\_mcmc\textquotesingle}: Differential-Independence Mixture Ensemble (DIME) sampler of \textcite{Boehl2022}
+      \item \texttt{\textquotesingle hssmc\textquotesingle}: Sequential
+Monte-Carlo sampler of \textcite{HerbstSchorfheide2014}
+     \item \texttt{\textquotesingle dsmh\textquotesingle}: Dynamic Striated Metropolis Hastings sampler of \textcite{WaggonerEtAl2016}
+    \end{enumerate}
+\end{witemize}
+\end{column}%
+\hfill%
+\begin{column}<1->{0.37\textwidth}
+\begin{figure}
+  \includegraphics[scale=.55]{Figures/inefficiency_factors}
+\end{figure}
+
+\end{column}%
+\end{columns}
+\begin{itemize}
+  \item Tend to be computationally more expensive but require less tweaking
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tailored Random Block Metropolis Hastings (TaRB)}
+
+\begin{witemize}
+    \item Triggered using\\
+    \texttt{posterior\_sampling\_method=\textquotesingle  tailored\_random\_block\_metropolis\_hastings\textquotesingle}
+    \item Basic idea employ multiple-block MH algorithm by grouping parameters into distinct blocks and sequentially update each block by a MH step
+    \item Correlated parameters should be put into same block, uncorrelated sets in different blocks
+    \item Problem: correlation structure a priori unknown
+    \item Solution: randomly assign parameters to blocks, with the \texttt{posterior\_sampler\_options} name/value pair \texttt{(new\_block\_probability,double)} governing probability of new block
+    \item For each MH step: run additional mode-finding step and compute (approximation) to Hessian\\
+    $\rightarrow$ powerful for finding true mode, but computationally expensive
+\end{witemize}
+
+\end{frame}
+
+\begin{frame}{Monitoring convergence}
+\begin{witemize}
+    \item We only want to consider draws after the transition kernel has converged to the invariant distribution
+    \item How to monitor that?
+    \begin{enumerate}
+      \item \textcite{Geweke1992} convergence diagnostics: requires single MCMC
+      \item \textcite{BrooksGelman1998} convergence diagnostics: requires at least two MCMC
+      \item \textcite{RafteryLewis1992} convergence diagnostics: can be requested using the \\ \texttt{raftery\_lewis\_diagnostics}-option
+    \end{enumerate}
+\end{witemize}
+\end{frame}
+
+\subsection{1.\ \textcite{Geweke1992} Convergence Diagnostics}
+\renewcommand{\Source}{\textcite{Geweke1992}}
+\begin{frame}{1.\ \textcite{Geweke1992} Convergence Diagnostics}
+\begin{itemize}
+    \item Idea: if we have sufficient number of draws from posterior, the first $S_A$ draws after a burn-in of $S_0$ should be similar to the last $S_C$ draws
+    \item By leaving out $S_B$ draws in the middle, draws in $S_A$ and $S_C$ should be independent
+    \item In practice, often $S_A=0.1S_1$, $S_C=0.4S_1$, where $S_1$ is the number of draws after the burn-in
+    \item To test similarity, test the means (or any other statistics) $g_{S_i}=E(g(\theta)|Y^T),i \in \{A,C\} $:
+    \begin{equation}
+          C{D_{GWK}} = \frac{{{{\hat g}_{{S_A}}} - {{\hat g}_{{S_C}}}}}{{\frac{{{{\hat \sigma }_A}}}{{\sqrt {{S_A}} }} + \frac{{{{\hat \sigma }_C}}}{{\sqrt {{S_C}} }}}}
+    \end{equation}
+    \item This is a two-sample t-test and thus asymptotically
+    \begin{equation}
+    CD_{GWK} \to N\left( {0,1} \right)
+    \end{equation}
+    \item Problem: estimate of numerical standard error $\hat \sigma_i$ needs to take correlation in draws into account
+    \item Use \textcite{NeweyWest1987}-type estimator that tapers spectral density
+\end{itemize}
+\end{frame}
+\note{Alternatively, as Dynare does it, the square is Ch2 distributed}
+
+
+\renewcommand{\Source}{}
+\begin{frame}{Example}
+\begin{figure}
+  \includegraphics[scale=.45]{Figures/geweke_diagnostics}
+\end{figure}
+\begin{itemize}
+    \item Higher tapers correcting for serial correlation suggest convergence
+\end{itemize}
+\end{frame}
+
+\subsection{2.\ \textcite{BrooksGelman1998} Convergence Diagnostics}
+\renewcommand{\Source}{\textcite{BrooksGelman1998}}
+\begin{frame}{2.\ \textcite{BrooksGelman1998} Convergence Diagnostics}
+\begin{witemize}
+    \item Idea: wherever the MC starts, it should converge to the same invariant distribution
+    \item Start multiple chains from \highlight{over-dispersed draws} and see whether they yield similar posterior draws after burn-in
+    \item The univariate convergence diagnostics are based on comparing \highlight{pooled} and \highlight{within} MCMC moments (ANOVA)
+    \item Consider a statistic $g$ with variance $\sigma$ and having $J$ chains with $N$ draws each after discarding a burn-in
+    \item Denote means with bars
+    \item The \highlight{variance within a chain} is given by
+    \begin{equation}
+    {\sigma _j^2} = \frac{1}{{N - 1}}\sum\limits_{n = 1}^N {{{\left( {{g_{nj}} - {{\bar g}_j}} \right)}^2}}
+    \end{equation}
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Getting the variances}
+\begin{itemize}
+    \item The \highlight{between sequence variance} $B/N$ is given by
+    \begin{equation}
+    \frac{B}{N} = \frac{1}{{J - 1}}\sum\limits_{j = 1}^J {{{\left( {{{\bar g}_j} - \bar g} \right)}^2}}
+    \end{equation}
+    \item Here, $B/N$ is the square of the standard error of the mean and $B$ the actual variance estimate of $g$
+    \item The (average) \highlight{within sequence variance} is given by
+    \begin{equation}
+    W = \frac{1}{{J\left( {N - 1} \right)}}\sum\limits_{j = 1}^J {\sum\limits_{n = 1}^N {{{\left( {{{\bar g}_{jn}} - {{\bar g}_j}} \right)}^2}} }  = \frac{1}{J}\sum\limits_{j = 1}^J \sigma _j^2
+    \end{equation}
+\item The variance $\sigma^2$ can now be estimated by a weighted average of the two:
+\begin{equation}
+{{\hat \sigma }^2} = \left( {1 - \frac{1}{N}} \right)W + \frac{{1 + J}}{{NJ}}B
+\end{equation}
+\item Because we use over-dispersed starting points, this is an overestimate of $\sigma^2$, but it is consistent
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Potential scale reduction factor}
+\begin{itemize}
+    \item The statistic of interest is the \highlight{potential scale reduction factor}, i.e.\ the ratio between the pooled variance estimate and the within-chain variance estimate:
+    \begin{equation}
+    \hat R = \sqrt \frac{{{{\hat \sigma }^2}}}{W}
+    \end{equation}
+    \item If $\hat R$ is large, either the pooled variance estimate $\hat \sigma^2$ can be decreased by further simulations or the within chain variance will increase due to it not yet having made a full tour through the target distribution
+    \item If $\hat R$ is close to 1, each of the $J$ chains of $N$ draws is close to the target distribution
+    \item At convergence, three properties should hold
+    \begin{itemize}
+      \item $\hat R$ should be close to 1
+      \item The pooled variance $\hat \sigma^2$ should stabilize with convergence as the chains were started from an over-dispersed distribution
+      \item The same should hold true for the within chain variance, which should be smaller than $\hat \sigma^2$
+    \end{itemize}
+    \item All three conditions can be monitored graphically
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A non-parametric version}
+\begin{witemize}
+    \item But: previous approach assumes normality by looking at means and variances
+    \item Alternative (also used in Dynare): take length of the $1-\alpha$ percentile for each of the chains and for the pooled draws
+    \item Compare the interval for the pooled draws with the average from the individual chains
+    \begin{equation}
+    \hat R_{interval} = \frac{\text{length of total sequence interval}}{\text{mean length of within sequence interval}}
+    \end{equation}
+    \item $R_{interval}$ is a \highlight{potential scale reduction factor} based on percentiles
+    \item The same convergence criteria apply
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}{Example}
+\begin{figure}
+  \includegraphics[scale=.55]{Figures/RBC_Bayesian_udiag1_300000.eps}
+\end{figure}
+\end{frame}
+
+\subsection{3.\ \textcite{RafteryLewis1992} Convergence Diagnostics}
+
+\renewcommand{\Source}{\textcite{RafteryLewis1992}}
+\begin{frame}{3.\ \textcite{RafteryLewis1992} convergence diagnostics}
+\begin{witemize}
+    \item The question: how many draws do we need to make sufficiently precise statements about a quantile of a posterior function $U(\theta)$?
+    \item Applicable to any function $U()$, but we take $U(\theta)=\theta$
+    \item Want to estimate quantile $q$ to within $\pm r$ with probability $s$
+    \item Typically: $q=0.025$, $r=0.0125$, $s=0.95$\\
+    $\rightarrow$ want reported 95\% HPDIs of $U$ to have actual posterior probability between 92.5\% and 97.5\%
+    \item To do so, we drop $M$ draws as a burn-in and then take $N$ draws of which we use every $k^{th}$ one
+    \item Central idea: construct Markov Chain out of $U(\theta_t)$ and then use Markov-Chain theory
+    \item Helpful derivations are provided in \textcite[][SI 6]{TrairatphisanEtAl2014} and \href{http://www.statslab.cam.ac.uk/~rrw1/markov/M.pdf}{Richard Weber's course notes}
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}{Discretization and finding thinning factor $k$}
+\begin{witemize}
+    \item First step: create binary indicator of whether a draw is below or above the cutoff value $u$ of the $q^{th}$ percentile
+    \begin{equation}
+    Z_t = \left\{ {\begin{array}{*{20}{c}}
+  {1, \text{ if } U(\theta_t)\leqslant u} \\
+  {0 \text{ otherwise}}
+\end{array}} \right.
+\end{equation}
+    \item $Z_t$ is typically not a Markov Chain, but thinned process $\left\{Z_t^{(k)}\right\}$, where we only take every $k^{th}$ draw, will typically approximate Markov Chain for sufficiently large $k$
+    \item Find $k$ by likelihood ratio test between second- and first-order Markov model\\
+    $\rightarrow$ take smallest $k$ for which first-order model fits better
+    \item Next step: find burn-in $M$
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Finding the burn-in $M$ I}
+\begin{itemize}
+    \item Denote the transition matrix for $\left\{Z_t^{(k)}\right\}$ with
+    \begin{equation}
+    P = \left( {\begin{array}{*{20}{c}}
+  {1 - \alpha }&\alpha  \\
+  \beta &{1 - \beta }
+\end{array}} \right)
+\end{equation}
+\item The stationary distribution is given by
+\begin{equation}
+\pi  = \left( {\begin{array}{*{20}{c}}
+  {{\pi _0}} \\
+  {{\pi _1}}
+\end{array}} \right) = \frac{1}{{\alpha  + \beta }}\left( {\begin{array}{*{20}{c}}
+  \alpha  \\
+  \beta
+\end{array}} \right)
+\end{equation}
+and the $l$-step transition matrix by
+\begin{equation}
+{P^l} = \left( {\begin{array}{*{20}{c}}
+  {{\pi _0}}&{{\pi _1}} \\
+  {{\pi _0}}&{{\pi _1}}
+\end{array}} \right) + \frac{{{\lambda ^l}}}{{\alpha  + \beta }}\left( {\begin{array}{*{20}{c}}
+  \alpha &{ - \alpha } \\
+  { - \beta }&\beta \: ,
+\end{array}} \right)
+\end{equation}
+where $\lambda=1-\alpha-\beta$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Finding the burn-in $M$ II}
+\begin{itemize}
+    \item We want a burn-in so that after $m$ draws, we are within $\varepsilon$ of stationary distribution, i.e.
+    \begin{equation}
+    P\left(Z_m^{(k)}=i|Z_m^{(0)}=j\right)=e_jP^me_i^T
+    \end{equation}
+    to be within $\varepsilon$ of $\pi_i$ for all $i,j$ (where $e_i$ denotes Euclidean basis vector)
+    \item This is satisfied for
+    \begin{equation}
+    {\lambda ^m} \leqslant \frac{{\left( {\alpha  + \beta } \right)\varepsilon }}{{\max \left( {\alpha ,\beta } \right)}} \Leftrightarrow m = \frac{{\log \left( {\frac{{\left( {\alpha  + \beta } \right)\varepsilon }}{{\max \left( {\alpha ,\beta } \right)}}} \right)}}{{\log \lambda }}
+    \end{equation}
+    \item Thus
+    \begin{equation}
+      M=mk
+    \end{equation}
+    \item Dynare uses $\varepsilon=0.001$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Finding the required number of draws $N$}
+\begin{itemize}
+    \item The quantile estimate is given by
+    \begin{equation}
+    {\bar{Z}}_t^{\left( k \right)}\equiv \hat P\left( {U \leqslant u} \right) = \frac{1}{n}\sum\limits_{t = 1}^n {Z_t^{\left( k \right)}}
+    \end{equation}
+    \item For large $n$, it is approximately normally distributed with mean $q$ and variance
+    \begin{equation}
+    \frac{1}{n}\frac{{\left( {2 - \alpha  - \beta } \right)\alpha \beta }}{{{{\left( {\alpha  + \beta } \right)}^3}}}
+    \end{equation}
+    \item Requirement $P\left(q-r \leq {\bar{Z}}_t^{\left( k \right)} < q+r \right)=s$ implies
+    \begin{equation}
+    n = \frac{{\left( {2 - \alpha  - \beta } \right)\alpha \beta }}{{{{\left( {\alpha  + \beta } \right)}^3}}}\left( {\frac{{{\Phi ^{ - 1}}\left( {\frac{1}{2}\left( {s + 1} \right)} \right)}}{r}} \right) \: ,
+    \end{equation}
+    where $\Phi^{ - 1}$ is the inverse standard normal CDF
+    \item Thus
+    \begin{equation}
+    N=nk
+    \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\renewcommand{\Source}{}
+\begin{frame}{Example}
+\begin{figure}
+  \includegraphics[scale=1.3]{Figures/Raftery_Lewis}
+\end{figure}
+\begin{itemize}
+    \item Can be requested using the \texttt{raftery\_lewis\_diagnostics}-option
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Prior vs. posterior plots}{\texttt{\texttt{RBC\_Bayesian.mod}}}
+\begin{figure}
+  \includegraphics[scale=.55]{Bayesian_Estimation/RBC_medium_acceptance/Output/RBC_medium_acceptance_PriorsAndPosteriors1}\\
+\end{figure}
+\begin{itemize}
+    \item Priors (grey) and posteriors (black) differ: data seems to be informative for updating
+    \item Exception: $\rho_z$ where we saw the flat likelihood
+    \item When the prior is (almost) equal to the posterior, there are two cases
+    \begin{itemize}
+      \item Data is uninformative
+      \item Data is informative, but coincides with chosen prior
+    \end{itemize}
+\end{itemize}
+\end{frame}
+

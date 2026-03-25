@@ -1,0 +1,3 @@
+\institute{University of the Bundeswehr Munich}
+\date{October 2025, Bank of Korea}
+\titlegraphic{\includegraphics[height=0.8cm]{../dlogo.png}}

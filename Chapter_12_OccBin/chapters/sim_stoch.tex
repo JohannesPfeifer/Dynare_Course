@@ -1,0 +1,130 @@
+\begin{frame}{Stochastic simulations}
+    \begin{wideitemize}
+    \item Stochastic (with shocks) $Ef\left(x_{t-1},x_t,x_{t+1},u_t | \theta \right) =0,$ with decision rules $x_t = g(x_{t-1},u_t|\theta)$ and assumptions about shock distributions.
+    \item Here, we search for decision functions: $g\left(\cdot\right)$ is unknown and can only be solved analytically in a few very simple cases.
+    \item Dynare applies a \hi{perturbation} approach to solve model: A Taylor expansion of the original model can be used to obtain a Taylor expansion of the solution.
+    \item To obtain the decision rules or policy function:
+    \begin{equation*}
+        x_t - x_0 = A\left(x_{t-1}-x_0\right)+Bu_t
+    \end{equation*}
+    \end{wideitemize}
+\end{frame}
+
+\begin{frame}[fragile]{Linearisation}
+    \begin{wideitemize}
+    \item We have linearised our three-equation model by hand.
+    \begin{itemize}
+        \item Declare the model as linear.
+        \begin{minted}{c++}
+        model(linear);
+        \end{minted}
+    \end{itemize}
+    \item Dynare can linearise the model for you! Use it if you can.
+    \item The model needs to be stationary to allow for linearisation around the steady state
+     \begin{itemize}
+        \item Dynare can handle deterministic and stochastic trends.
+        \item One can always add trends back to the model.
+    \end{itemize}
+    \item Always (try to) provide an analytical steady state. However, Dynare can numerically solve for it based on some starting value (\texttt{initval;}).
+    \end{wideitemize}
+\end{frame}
+
+
+\begin{frame}{Our model}
+\begin{align*}
+y_t 	=& E_t \left[y_{t+1} \right]- \frac{1}{\sigma}\left(i_t-E_t\left[\pi_{t+1}\right]\right)+\varepsilon_t^c \\
+\pi_t 	=& \beta E_t\left[\pi_{t+1}\right]+\kappa y_t +\varepsilon_t^a \\
+i_t 	=& \phi_\pi \pi_t + \phi_y y_t + \varepsilon_t^i
+\end{align*}
+in matrix form
+\begin{equation*}
+\underbrace{
+\begin{bmatrix}
+-1 & -1 & 0\\
+-0 & \beta & 0 \\
+0 & 0 & 0
+\end{bmatrix}}_{A_1}
+\underbrace{
+\begin{bmatrix}
+E_t\left[y_{t+1} \right]\\
+E_t\left[\pi_{t+1} \right]\\
+E_t\left[i_{t+1} \right]
+\end{bmatrix}}
+_{E_t[X_{t+1}]}
+=
+\underbrace{
+\begin{bmatrix}
+-1 & 0 & -\frac{1}{\sigma}\\
+\kappa & -1 & 0 \\
+\phi_y&\phi_\pi & -1
+\end{bmatrix}}_{A_0}
+\underbrace{
+\begin{bmatrix}
+y_{t}\\
+\pi_{t}\\
+i_{t}
+\end{bmatrix}}_{X_t}
++\underbrace{
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix}}_{\mathcal{E}}
+\underbrace{
+\begin{bmatrix}
+\varepsilon^c_{t}\\
+\varepsilon^a_{t}\\
+\varepsilon^i_{t}
+\end{bmatrix}}_{u_t}
+\end{equation*}
+\begin{itemize}
+    \item Note: We used a slightly different notation by including the shock processes in matrix $\mathcal{E}$. In Dynare, $u_t$ contains only the white noise for stochastic variables, i.e. our $u$'s.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{How to solve the model (linearly)}
+\begin{wideitemize}
+\item We have a system of the form
+\begin{equation*}
+A_1E_t\left[X_{t+1}\right] + A_0X_t  + A_{-1}X_{t-1} +  \mathcal{E} u_t = 0
+\end{equation*}
+where in our case $A_{-1}$ is a matrix of zeros.
+\item There are many algorithms to solve this system.
+\item Dynare uses a generalised Schur decomposition based on the method of Klein (2000)\footcite{klein2000using} to obtain the solution of the form:
+\begin{equation*}
+    X_{t} = TX_{t-1}+Cu_t
+\end{equation*}
+\item Villemot (2011) shows you the algebra.\footcite{villemot2011solving}
+\end{wideitemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Stochastic simulation command}
+    \begin{wideitemize}
+    \item The command  Simulates data from the model and performs IRFs \href{https://www.dynare.org/manual/the-model-file.html?highlight=stoch_sim#stoch_simul}{\texttt{stoch\_sim}}
+    computes a Taylor approximation around the steady state.
+    \item \texttt{order} sets the approximation order.
+    \item \texttt{period} sets the number of simulation periods
+    \item You can select variables to be plotted and printed on the screen.
+    \begin{minted}{c++}
+    stoch_simul(irf=20, order=1,periods=100) y;
+    \end{minted}
+    \item The Dynare reference manual lays out the many available options.
+    \end{wideitemize}
+\end{frame}
+
+\begin{frame}{Accessing results}
+\begin{wideitemize}
+\item You can access the results of the solution (decision rules) in the results structure \texttt{oo\_.dr}
+\item Field \texttt{ys} contains the steady state.
+\item Field \texttt{ghx} contains the transition matrix (with all endogenous variables in deviation from the steady state)
+\item Field \texttt{ghu} contains the matrix attached to the exogenous shocks
+\end{wideitemize}
+\end{frame}
+
+
+\begin{frame}{Hands-on}
+\begin{wideitemize}
+\item Let's look at the \hi{code for stochastic simulations} in practice.
+\end{wideitemize}
+\end{frame} 

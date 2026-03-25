@@ -1,0 +1,69 @@
+\documentclass[handout,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[beamer,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[trans,notes=show,usepdftitle=false,aspectratio=169]{beamer}
+
+\input{../Preamble/preamble.tex}
+
+\newenvironment{wideitemize}{\itemize\addtolength{\itemsep}{10pt}}{\enditemize}
+\newenvironment{wideenumerate}{\enumerate\addtolength{\itemsep}{10pt}}{\endenumerate}
+\newcommand{\hi}[1]{{\color{beamer@blendedblue}#1}}
+
+
+\title[]{\textbf{Advanced Dynare\\}
+\medskip{Chapter XIII}\\
+\emph{Solving Models with Occasionally Binding Constraints}
+}
+
+\author{Johannes Pfeifer}
+\input{../date_place.txt}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\input{chapters/start.tex}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section[Prototype model]{A prototype model}
+ \input{chapters/ProtoNKM.tex}
+
+%\section[Dynare 101]{A fast-speed intro to Dynare}
+\input{chapters/Dynare.tex}
+
+\section[Perfect foresight]{Perfect foresight simulations}
+\input{chapters/sim_det}
+
+\section{Stochastic simulations: OccBin}
+\input{chapters/sim_occ}
+
+%\input{chapters/simulation.tex}
+
+%\section[Estimation primer]{Model estimation: Basics}
+%\input{chapters/estimation.tex}
+
+%\section[OBC Estimations]{Model estimation with occasionally binding constraints}
+%\input{chapters/estimation_OBC.tex}
+
+%\input{chapters/end}
+
+%\section*{Appendix}
+%\input{chapters/annex.tex}
+\begin{frame}[allowframebreaks]{Literature}
+\printbibliography
+\end{frame}
+
+\end{document} 

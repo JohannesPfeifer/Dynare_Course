@@ -1,0 +1,531 @@
+% LTeX: language=en-US
+\documentclass[handout,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[beamer,usepdftitle=false,xcolor=dvipsnames,aspectratio=169]{beamer}
+%\documentclass[trans,notes=show,usepdftitle=false,aspectratio=169]{beamer}
+ 
+\input{../Preamble/preamble.tex}
+
+\usepackage{smartdiagram}
+
+\usepackage{upquote}
+
+\AtBeginSection[]
+{
+  \begin{frame}{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+
+\title[]{\textbf{Advanced Dynare\\}
+\medskip{Chapter I}\\
+\emph{The software Dynare}
+}
+
+\author{Johannes Pfeifer}
+\input{../date_place.txt}
+
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\section{Intro}
+\begin{frame}{Licensing and Thank you}
+	\begin{witemize}
+        \item The slides have benefited from the work and materials generously shared by friends and colleagues
+        \begin{itemize}
+          \item Stéphane Adjemian
+          \item Houtan Bastani
+          \item Michel Juillard
+          \item Willi Mutschler
+          \item Philipp Pfeiffer
+          \item Marco Ratto
+          \item Normann Rion
+          \item Sébastien Villemot
+        \end{itemize}
+        \item The licensing varies between completely free, MIT, CC-BY-SA 4.0, and unspecified\\
+        $\rightarrow$ impossible to sort out in time
+        \item Where applicable, I state the license\\
+        $\rightarrow$ this chapter benefitted from Philipp Pfeiffer
+    \end{witemize}
+\end{frame}
+
+
+\begin{frame}{Licensing and Thank you}
+	\begin{witemize}
+        \item Slides always contain errors
+        \item If you spot one, please let me know
+        \item I will \alert{correct them in red}
+    \end{witemize}
+\end{frame}
+
+\section{Dynare Overview}
+
+\begin{frame}{What is Dynare?}
+	\begin{witemize}
+	    \item A free software platform for handling a wide class of economic models, in particular, DSGE models
+        \item Provides modeling language to represent models and computing tasks, with clear separation between
+        \begin{enumerate}
+          \item particular model declared by the user\\
+          $\rightarrow$ binary preprocessor to translate modeling language into model representation useful for computations
+          \item computing functions that handle an entire family of DSGE models\\
+          $\rightarrow$ collection of MATLAB/Octave routines for computations/task
+        \end{enumerate}
+	    \item Dynare is very user-friendly and has low entry costs\\
+        $\rightarrow$ history is described in the aptly titled \textcite{CherrierEtAl2023}: \citetitle{CherrierEtAl2023}
+	    \item Users provide \texttt{.mod} file containing parameters, model equations linking the variables, and computing tasks to be performed
+	\end{witemize}
+\end{frame}
+
+\begin{frame}{Dynare resources}
+	\begin{witemize}
+	    \item Download at \url{https://www.dynare.org/}, latest version: Dynare 6.4\\
+        $\rightarrow$ Dynare 7 hopefully in Q1 of 2026
+        \item Dynare manual: \textcite{Adjemianetal2024}
+        \item Forum at \url{https://forum.dynare.org/}
+        \item Git repository with code, Wiki, buglist at \url{https://git.dynare.org/Dynare/dynare/}
+        \item \textcite{Pfeifer2013}: \href{https://drive.google.com/file/d/1r89OU5OE3CBa6tOlj6l3hNVWEaRH5Anv/view}{\citetitle{Pfeifer2013}}
+        \item \textcite{Pfeifer2013Graphs}: \href{https://drive.google.com/file/d/1DO1OK5AKLWfcJX49ZPCGo58Ni2LdERw4/view}{\citetitle{Pfeifer2013Graphs}}
+        \item Collection of example files: \url{https://github.com/johannespfeifer/dsge_mod}
+	\end{witemize}
+\end{frame}
+
+
+\begin{frame}{Tools available in Dynare}
+	\begin{enumerate}
+	\item computes the solution of perfect foresight models (arbitrary accuracy)
+	\item computes first- and higher-order approximation to solution of stochastic models
+	\item estimates (maximum likelihood, Bayesian approach, method of moments) parameters
+	of DSGE models, for linear and non-linear models
+    \item handles occasionally binding constraints
+	\item checks for identification of estimated parameters
+	\item computes optimal policy (OSR, Ramsey, discretion)
+	\item performs global sensitivity analysis of a model
+	\item provides macro language and reporting facility
+    \item forecasting
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{How Dynare works}
+\includegraphics[width=0.8\textwidth]{figures/Dynare.PNG}\\
+\end{frame}
+
+\section{Modeling language}
+
+\begin{frame}{A Dynare file}
+Our model:
+\begin{itemize}
+    \item Endogenous variables: $\pi_t, y_t, i_t, \varepsilon_t^a, \varepsilon_t^c, \varepsilon_t^i $
+    \item Some parameters: $ \beta, \kappa, \sigma,\phi_\pi,\phi_y,\rho^a, \rho^c, \rho^i $
+    \item Exogenous variables (shocks): $,u_t^a,u_t^c,u_t^i$
+    \item A three equation New Keynesian model:
+    \begin{align}
+        \pi_t =& \beta \mathbb{E}_t\left[\pi_{t+1}\right]+\kappa y_t +\varepsilon_t^a \\
+        y_t =& \mathbb{E}_t \left[y_{t+1} \right]- \frac{1}{\sigma}\left(i_t-\mathbb{E}_t\left[\pi_{t+1}\right]\right)+\varepsilon_t^c \\
+        i_t =& \phi_\pi \pi_t + \phi_y y_t+\varepsilon_t^i
+    \end{align}
+    and AR-processes for exogenous processes
+    \begin{equation}
+      \varepsilon^j_t=\rho_j \varepsilon_{t-1}^j+u_t^j
+    \end{equation}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Structure of a Dynare file}
+\begin{figure}
+\smartdiagramset{back arrow disabled,module minimum width=2.cm,font=\footnotesize}
+\smartdiagram[flow diagram:horizontal]{Preamble, Model definition, Steady state, Simulation and estimation}
+\end{figure}
+\begin{enumerate}
+\item Preamble: Declaration of endogenous and exogenous variables and parameters. Set value for calibrated parameters
+\item Model definition: State the dynamic model equations
+\item Steady state (long-run equilibrium)
+\item Additional computations: model checks,  simulation, estimation, ...
+\end{enumerate}
+\begin{itemize}
+\item All command lines are terminated with a semicolon
+\item Blocks are terminated with an \texttt{end;}
+\item Comments either using \% (Matlab style) or //, /* */ (C-style)\\
+$\rightarrow$ Matlab comments allow simpler debugging
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{How to interact with Dynare: 1) Preamble}
+\begin{columns}<.->
+\begin{column}<1->[T]{0.5\textwidth}
+	    \begin{witemize}
+	        \item Endogenous variables: $\pi_t, y_t, i_t, \varepsilon_t^a, \varepsilon_t^c, \varepsilon_t^i$
+	        \item Exogenous variables (shocks): $u_t^a, u_t^c, u_t^i$
+	        \item Parameters: $ \beta, \theta, \eta, \sigma,\phi_\pi,\phi_y,\rho^a,\rho^c,\rho^i $
+	    \end{witemize}
+\end{column}
+\begin{column}[T]{0.5\textwidth}
+Dynare code
+\begin{minted}{c++}
+var // endo vars
+pie y inom eps_a eps_c eps_i;
+
+varexo
+u_a u_c u_i;
+
+parameters
+betta theta eta sig phi_pi
+phi_y rho_a rho_c rho_i;
+\end{minted}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{\LaTeX\ definitions in Dynare}
+\begin{itemize}
+	\item Note: For all three types, you can specify \LaTeX\ names with \$\$ and long names for Dynare output with \texttt{(long\_name='name here')}
+\end{itemize}
+
+\begin{minted}{c++}
+var // endo vars
+pie ${\pi}$ (long_name='Quarterly inflation rate')
+y   ${y}$   (long_name='Output gap')
+;
+
+varexo
+u_a ${u_a}$ (long_name='Cost-push shock')
+;
+
+parameters
+betta   ${\beta}$    (long_name='Discount factor')
+theta   ${\theta}$   (long_name='Calvo parameter')
+;
+\end{minted}
+\end{frame}
+
+
+\begin{frame}[fragile]{How to interact with Dynare: 1) Preamble (cont'd)}
+\begin{columns}<.->[T] % align columns
+\begin{column}<1->[T]{0.5\textwidth}
+	    \begin{witemize}
+	        \item Set $\beta$ and $\theta$ to conventional values informed by real interest rates and price adjustment frequencies
+	        \item Choose parameters for the Taylor rule
+	        \item Set autocorrelation coefficients
+	        \item Unit intertemporal elasticity of substitution
+	    \end{witemize}
+\end{column}
+\begin{column}[T]{0.5\textwidth}
+\begin{minted}{c++}
+// Calibration
+betta   = 0.995;
+eta     = 1;
+theta   = 0.78;
+phi_pi  = 1.5;
+phi_y   = .5/4;
+rho_a   = 0.8;
+rho_c   = 0.9;
+rho_i   = 0.5;
+sig     = 1;
+\end{minted}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{How to interact with Dynare: 2) Model definition}
+\begin{columns}<.->[T] % align columns
+\begin{column}<1->[T]{0.4\textwidth}
+	    \begin{witemize}
+	        \item Dynare allows writing the model in a very natural way
+	        \item \texttt{model}-block contains model declaration\\
+            $\rightarrow$ \texttt{linear} states that model is already linearised
+	        \item \texttt{(+1)} indicates one-period ahead variables $X_{t+1}$ (forward-looking)
+	        \item \texttt{(-1)} indicates lagged variables $X_{t-1}$ (backward-looking)
+            \item $X_t$ is written $X$ (no time index needed for the current period)
+	    \end{witemize}
+\end{column}
+\begin{column}[T]{0.6\textwidth}
+\begin{minted}{c++}
+model(linear);
+[name='Phillips Curve']
+pie=betta*pie(+1)+kappa*y+zeps_a;
+[name='DIS curve']
+y=y(+1)-1/sig*(inom-pie(+1))
++zeps_c;
+[name='Nominal interest rate Taylor rule']
+inom=phi_pi*pie+phi_y*y+zeps_i;
+zeps_a=rho_a*zeps_a(-1)+u_a;
+zeps_c=rho_c*zeps_c(-1)+u_c;
+zeps_i=rho_i*zeps_i(-1)+u_i;
+
+end;
+\end{minted}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Timing conventions}
+\begin{itemize}
+	\item Time indices refer to period when variable is determined, i.e.\ \highlight{stock at the end of period notation}
+	\item Capital stock used in production at time $t$ is determined by investment at time $t-1$\\
+$\rightarrow$ predetermined
+	\begin{align}
+	K_t&=(1-\delta)K_{t-1}+I_t\\
+	Y_t&=K_{t-1}^\alpha L_t^{1-\alpha}
+	\end{align}
+	\item To use \highlight{stock at the beginning of period notation}
+	\begin{align}
+	K_{t+1}&=(1-\delta)K_{t}+I_t\\
+	Y_t&=K_{t}^\alpha L_t^{1-\alpha}
+	\end{align}
+	you can declare variable as predetermined using \texttt{predetermined\_variables} declaration
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Timing conventions: Code}
+\begin{columns}<.->
+\begin{column}<1->[T]{0.5\textwidth}
+Example using the default convention
+\begin{minted}{c++}
+var y, k, i;
+...
+...
+model;
+y = k(-1)^alpha;
+k = i + (1-delta)*k(-1);
+...
+end;
+\end{minted}
+\end{column}
+\begin{column}[T]{0.5\textwidth}
+Using \href{https://www.dynare.org/manual/the-model-file.html?highlight=predetermined#predetermined_variables}{\texttt{predetermined\_variables}}:
+\begin{minted}{c++}
+var y, k, i;
+predetermined_variables k;
+...
+model;
+y = k^alpha;
+k(+1) = i + (1-delta)*k;
+...
+end;
+\end{minted}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Timing conventions: conditional expectations}
+\begin{witemize}
+\item Conditional expectations operator $\mathbb{E}_t$ typically not needed in Dynare as it starts from equilibrium system
+\begin{equation}
+0=\mathbb{E}_t\left(f(y_{t+1},y_t,y_{t-1},\varepsilon_t)\right)
+\end{equation}
+and therefore assumes conditional expectations operator in front of every equation
+\item \texttt{1/c=beta/c(+1)*(R(+1));}\\
+corresponds to
+\begin{equation}
+\frac{1}{c_t}=\mathbb{E}_t\left(\frac{1}{c_t}\right)=\mathbb{E}_t\left(\beta \frac{R_{t+1}}{c_{t+1}}\right)=\beta \mathbb{E}_t\left(\frac{R_{t+1}}{c_{t+1}}\right)
+\end{equation}
+\item Due to certainty equivalence at first order, we do not have to bother with this, but intricate issues can arise at higher order (e.g.\ Epstein-Weil-Zin preferences)
+    \item \texttt{EXPECTATION(INTEGER)(MODEL\_EXPRESSION)} allows specifying information set of expectations explicitly
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}{The steady state}
+\begin{witemize}
+	\item If not told differently, Dynare tries whether 0 is the steady state, and if not, starts a numerical solver to find the steady state
+	\item As 0 is often infeasible for nonlinear models, always provide explicit steady state information
+	\item Three ways to do this:
+	\begin{enumerate}
+		\item compute steady state analytically and provide it to Dynare using \texttt{steady\_state\_model}-block
+		\item provide initial guesses to start the numerical optimizer using the \texttt{initval}-block (the better, the higher the chances of finding the steady state; economic intuition provides good guidance, e.g. $I<C<Y<K$, with $I=\delta K$.)
+		\item use explicit steady state file, which offers a lot of flexibility
+	\end{enumerate}
+	\item Note: linearized models typically do not spare you from computing the steady state, they just shift the problem to computing parameters
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{How to interact with Dynare: 3) Steady state}
+\begin{columns}<.->
+\begin{column}<1->[T]{0.5\textwidth}
+	    \begin{witemize}
+	        \item Our model is expressed in deviation from the steady state (around zero inflation)
+	        \item The deterministic steady state implies no shocks: $u= 0$
+	        \item Thus, all variables are zero in the steady state
+	    \end{witemize}
+\end{column}
+\begin{column}[T]{0.5\textwidth}
+\begin{minted}{c++}
+steady_state_model;
+pie=0;
+y=0;
+inom=0;
+zeps_a=0;
+zeps_c=0;
+zeps_i=0;
+end;
+\end{minted}
+or
+\begin{minted}{c++}
+steady_state_model;
+end;
+\end{minted}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]{Numerical steady state}
+\begin{witemize}
+    \item Dynare can solve for the steady state using initial starting values provided
+\begin{minted}{c++}
+initval;
+y=0;
+end;
+\end{minted}
+    \item Inside \texttt{steady\_state\_model;} and \texttt{initval;}-blocks, you can define variables recursively and use auxiliary definitions
+    \item Always use a fully analytical steady state if possible (especially for \texttt{estimation})
+    \item The steady state values stored in \texttt{oo\_.steady\_state} follow the declaration order
+    \item You can access steady state values within the \texttt{model;}-block using the \texttt{STEADY\_STATE (MODEL\_EXPRESSION)} operator
+\end{witemize}
+\end{frame}
+
+\begin{frame}[fragile]{Steady state \texttt{.m}-file}
+\begin{witemize}
+    \item You can also calculate the steady state using your own numerical routines.
+    \item Create a Matlab file with the same name as your model followed by \texttt{\_steadystate.m}\\
+    $\rightarrow$ \texttt{DSGE\_steadystate.m} for model file \texttt{DSGE.mod}
+    \item The file allows a lot of flexibility like calling numerical solvers, but syntax is more involved
+    \item Full example available \href{https://git.dynare.org/Dynare/dynare/-/blob/master/examples/NK_baseline_steadystate.m}{here [LINK]}
+\end{witemize}
+\end{frame}
+
+\begin{frame}{Digression: Log-linearization vs.\ linearization}
+\begin{witemize}
+\item Dynare linearizes the model around the steady state\vspace{0.2cm}
+\item However, we often want log-linearization to express everything in percentage deviations from steady state (or the balanced growth path)\vspace{0.2cm}
+\item To obtain a log-linear solution, you can\vspace{0.2cm}
+\begin{enumerate}
+\item use the \texttt{loglinear} option\vspace{0.2cm}
+\item write down the model in terms of logarithmic transformations of the original variables (exp()-substitution)\vspace{0.2cm}
+\item append the logarithm of model variables as separate model variables (e.g.\ \texttt{log\_y=log(y)})\\
+
+$\rightarrow$ Dynare 6.x: use \texttt{var(log) y;} to append \texttt{LOG\_Y}
+\end{enumerate}
+\item The last option tends to be the most preferable
+\end{witemize}
+\end{frame}
+
+\begin{frame}[fragile]{Structure of typical Dynare $.mod$ file: shocks}
+\begin{witemize}
+	\item \texttt{shocks;}-block defining the covariance matrix of exogenous shocks
+\begin{minted}{c++}
+shocks;
+    var u_c  = 0.005^2;
+    var u_a  = 0.005^2;
+    var u_i  = 0.005^2;
+    //corr u_c,u_i=0.5;
+end;
+\end{minted}
+\item Also allows specifying correlations (or covariances)
+\item Different syntax for perfect foresight and OccBin
+\end{witemize}
+\end{frame}
+
+\begin{frame}[fragile]{Parameter dependence}
+\begin{witemize}
+    \item Sometimes, parameters like the slope of the Phillips Curve are functions of other parameters:
+    \begin{equation}
+      \kappa=\frac{(\sigma+\eta)(1-\theta)(1-\beta\theta)}{\theta}
+    \end{equation}
+    \item There are two ways to handle such objects:
+    \begin{enumerate}
+        \item As a model-local variable in the \texttt{model} block, using the \# operator\\
+        $\rightarrow$ declaring \texttt{model\_local\_variable} allows setting \LaTeX\ name
+        \item setting them in a \texttt{steady\_state\_model}-block or file
+    \end{enumerate}
+
+\begin{minted}{c++}
+model_local_variable kappa $\kappa$;
+model(linear);
+#kappa = (sig+eta)*(1-theta)*(1-betta*theta)/theta;
+
+pie=betta*pie(+1)+kappa*y+zeps_a;
+\end{minted}
+    \item Accounting for these dependencies is important, especially for estimation
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Requesting computations}
+\begin{witemize}
+	  \item Display residuals with \href{https://www.dynare.org/manual/the-model-file.html?highlight=resid#resid}{\texttt{resid;}} command
+	  \item Compute and display steady state with \href{https://www.dynare.org/manual/the-model-file.html?highlight=steady#steady}{\texttt{steady;}} command
+	\item \href{https://www.dynare.org/manual/the-model-file.html?highlight=check#check}{\texttt{check;}} command to display local stability conditions
+\begin{minted}{c++}
+resid;  %display residuals
+steady; %display steady state (and compute it if necessary)
+check;  %display local stability information
+\end{minted}
+	\item \href{https://www.dynare.org/manual/the-model-file.html?highlight=stoch_simul#stoch_simul}{\texttt{stoch\_simul;}} command  to
+	\begin{itemize}
+		\item linearize the model around the steady state
+		\item compute recursive equilibrium laws of motion of the linearized model
+		\item analyze the model via impulse responses, stochastic simulations, moments, etc.
+	\end{itemize}\vspace{0.2cm}
+\begin{minted}{c++}
+stoch_simul(order=1,irf=20,irf_plot_threshold=0) y pie inom;
+\end{minted}
+\end{witemize}
+\end{frame}
+
+\begin{frame}[fragile]{\LaTeX\ support}
+\begin{witemize}
+    \item 	 Commands to generate \LaTeX\ output
+\begin{minted}{c++}
+write_latex_dynamic_model(write_equation_tags);
+write_latex_parameter_table;
+write_latex_definitions;
+collect_latex_files;
+\end{minted}
+\item Particularly useful for debugging
+\end{witemize}
+\end{frame}
+
+\section{Invocation and results}
+
+\begin{frame}[fragile]{Running Dynare}
+\begin{witemize}
+    \item You need to add Dynare to your Matlab path, e.g.
+    \begin{minted}{matlab}
+    addpath('c:/dynare/6.4/matlab')
+    \end{minted}
+    \item You can run a \texttt{.mod}-file located in MATLAB's \textit{Current Folder} using
+    \begin{minted}{matlab}
+    dynare FILENAME[.mod]
+    \end{minted}
+\end{witemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Accessing Dynare output}
+\begin{witemize}
+    \item Dynare stores results, model information, and selected options in MATLAB structures (use the tab key at the MATLAB command line to access the different fields)
+    \begin{witemize}
+        \item \texttt{oo\_} stores results from computations (simulation results, ...)
+        \item \texttt{M\_} stores model information (e.g. info on parameters and their values)
+        \item \texttt{options\_} stores the selected options
+        \item \texttt{estim\_params\_} stores information on estimated parameters
+        \item \texttt{bayestopt\_} stores information on the prior
+    \end{witemize}
+    \item All output fields should be documented in the manual
+\end{witemize}
+\end{frame}
+
+
+
+\part{References}
+%%%
+\begin{frame}[allowframebreaks]{Bibliography}
+\printbibliography
+\end{frame}
+\end{document}

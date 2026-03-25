@@ -1,0 +1,74 @@
+% LTeX: language=en-US
+
+\section{Introduction}
+\begin{frame}{Overview}
+	\begin{wideitemize}
+        \item Focus on models with \hi{occasionally binding constraints}
+        \item Since Dynare 5: implementation of OccBin toolkit to solve models with occasionally binding constraints
+        \item Feature only recently added\\
+        $\rightarrow$ please report any bugs you may encounter
+    \end{wideitemize}
+\end{frame}
+
+\begin{frame}{Occasionally binding constraints}
+	\begin{wideitemize}
+        \item Historically, economists relied on linearized models:
+            \begin{wideitemize}
+                \item Useful to gain intuition
+                \item Easy to apply, especially for estimation (linear state space tools)
+            \end{wideitemize}
+        \item However: many interesting economic problems and policy questions feature nonlinearities such as \hi{occasionally binding constraints (OBCs)}:
+        \begin{wideitemize}
+            \item effective lower bound on nominal interest rates \parencite{ChristianoEichenbaumRebelo2011}
+            \item Credit constraints \parencite{GuerrieriIacoviello2017}
+            \item Downward nominal wage rigidities \parencite{SGU2016}
+        \end{wideitemize}
+        \item Not always sensible to assume OBC is always binding as in e.g.\ \textcite{Iacoviello2005} or \textcite{JermannQuadrini2012}
+    \end{wideitemize}
+\end{frame}
+
+
+\begin{frame}{Occasionally Binding Constraints in Dynare}
+	\begin{wideitemize}
+        \item Dynare essentially offers three options to solve models with occasionally binding constraints:
+        \begin{wideenumerate}
+	    \item Nonlinear perfect foresight models: brute force (\texttt{max/min}-operators) and mixed complementarity problems (MCP)
+	    \item Linearized stochastic models with surprise shocks: OccBin
+        \item Stochastic nonlinear models: Extended Path
+        \end{wideenumerate}
+	    %\item Model estimations via Bayesian techniques or maximum likelihood, including models with OBCs
+	\end{wideitemize}
+\end{frame}
+
+
+\begin{frame}{Crucial distinction: informational structure}
+
+\begin{enumerate}
+ \item deterministic/perfect foresight: all future shocks are known exactly
+  \item stochastic simulations: only the shock distributions are known
+\end{enumerate}
+
+\begin{columns}[T]
+\column{0.5\linewidth}
+\begin{wideitemize}
+    \item \hi{Deterministic:}
+     \begin{itemize}
+	        \item[+] Arbitrary precision
+	        \item[+] Easily captures nonlinearities (such as OBCs)
+	        \item[--] Assumption of perfect foresight
+	        \item[--] How to simulate time series?
+	    \end{itemize}
+\end{wideitemize}
+\column{0.5\linewidth}
+\begin{wideitemize}
+    \item \hi{Stochastic:}
+	      \begin{itemize}
+	        \item[+] Captures uncertainty
+	        \item[+] Needed for estimation with state space form
+            \item[--] Typically suffers from curse of dimensionality
+	        \item[+] Perturbation methods can capture OBCs with additional tools (OccBin)
+	        \item[--] Often uses 1st order approximations: certainty equivalence
+	    \end{itemize}
+\end{wideitemize}
+\end{columns}
+\end{frame}
